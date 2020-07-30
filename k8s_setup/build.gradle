@@ -5,7 +5,7 @@ plugins {
     id "java"
 }
 
-group = ""
+group = String.format("%s.%s", project.main_group, project.getName())
 version = project.main_version
 sourceCompatibility = project.java_version
 targetCompatibility = project.java_version
@@ -15,12 +15,9 @@ repositories.addAll(buildscript.repositories)
 
 dependencies {
     processor 'org.inferred:freebuilder:2.6.1'
-    implementation("com.h2database:h2:1.4.195")
-    implementation("org.apache.shiro:shiro-spring-boot-web-starter:1.5.3")
     implementation("com.google.guava:guava:29.0-jre")
     implementation("org.apache.commons:commons-lang3:3.0")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     testImplementation("junit:junit:4.12")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude group: "org.junit.vintage", module: "junit-vintage-engine"
@@ -29,4 +26,16 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+task runJar(type: Exec) {
+    executable("java")
+    args(
+            String.format("-Dspring.config.location=%s", project.file("application.yaml")),
+            "-jar", project.file(String.format("build/libs/%s-%s.jar", project.getName(), project.getVersion())),
+    )
+    doFirst {
+        println(String.join(" ", getCommandLine()))
+    }
+    dependsOn(bootJar)
 }
