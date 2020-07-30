@@ -1,0 +1,10 @@
+task buildAll {
+    //dependsOn("shiro_example:bootJar")
+}
+allprojects {
+    task printInfo {
+        doLast {
+            println("in $project.name version: $project.main_version")
+        }
+    }
+}
