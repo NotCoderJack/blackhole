@@ -18,10 +18,12 @@ dependencies {
     implementation("com.google.guava:guava:29.0-jre")
     implementation("org.apache.commons:commons-lang3:3.0")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.freemarker:freemarker:2.3.9")
     testImplementation("junit:junit:4.12")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude group: "org.junit.vintage", module: "junit-vintage-engine"
     }
+    implementation(project(":core"))
 }
 
 test {
@@ -33,6 +35,7 @@ task runJar(type: Exec) {
     args(
             String.format("-Dspring.config.location=%s", project.file("application.yaml")),
             "-jar", project.file(String.format("build/libs/%s-%s.jar", project.getName(), project.getVersion())),
+            project.file("template"),
     )
     doFirst {
         println(String.join(" ", getCommandLine()))
