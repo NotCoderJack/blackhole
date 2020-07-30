@@ -1,7 +1,8 @@
 .gradle
-/build/
+build/
 gradle-app.setting
 !gradle-wrapper.jar
 .gradletasknamecache
 gradle/pkg/
+gradle/user/
 .idea/
