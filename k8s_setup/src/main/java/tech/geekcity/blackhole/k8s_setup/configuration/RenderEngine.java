@@ -36,12 +36,12 @@ public class RenderEngine implements Configurable, Runnable {
     @Override
     public void run() {
         try {
-            Template template = configuration.getTemplate("test_template.txt");
+            Template template = configuration.getTemplate("setup_docker_environment.sh");
             Writer out = new OutputStreamWriter(System.out);
             template.process(
                     ImmutableMap.builder()
-                            .put("key", "value")
-                            .put("key2", "value2")
+                            .put("__DOLLAR__", "$")
+//                            .put("dockerCeRepo", "http://")
                             .build(),
                     out);
         } catch (IOException | TemplateException e) {
