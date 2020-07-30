@@ -1,3 +1,0 @@
-hello free marker
-key = ${key}
-key2 = ${key2}
