@@ -1,25 +1,67 @@
 package tech.geekcity.blackhole.k8s_setup.configuration;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ImmutableMap;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
+import org.inferred.freebuilder.FreeBuilder;
 import tech.geekcity.blackhole.core.Configurable;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.*;
+import java.util.Map;
 
-public class RenderEngine implements Configurable, Runnable {
-    private String templatePath;
-    private Configuration configuration;
+@FreeBuilder
+@JsonDeserialize(builder = RenderEngine.Builder.class)
+public abstract class RenderEngine implements Configurable {
+    private transient Configuration configuration;
+
+    /**
+     * Returns a new {@link Builder} with the same property values as this {@link RenderEngine}
+     */
+    public abstract Builder toBuilder();
+
+    /**
+     * Builder of {@link RenderEngine} instances
+     * auto generated builder className which cannot be modified
+     */
+    public static class Builder extends RenderEngine_Builder {
+        private ObjectMapper objectMapper = new ObjectMapper();
+
+        public static Builder newInstance() {
+            return new Builder();
+        }
+
+        public Builder() {
+            templatePath("./template");
+        }
+
+        public String toJson() throws JsonProcessingException {
+            return objectMapper.writeValueAsString(build());
+        }
+
+        public String toJsonSilently() {
+            try {
+                return objectMapper.writeValueAsString(build());
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public RenderEngine parseFromJson(String json) throws IOException {
+            return objectMapper.readValue(json, RenderEngine.class);
+        }
+    }
+
+    public abstract String templatePath();
 
     @Override
     public void open() throws IOException {
         configuration = new Configuration();
-        configuration.setDirectoryForTemplateLoading(new File(templatePath));
+        configuration.setDirectoryForTemplateLoading(new File(templatePath()));
         configuration.setDefaultEncoding("UTF-8");
         configuration.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
     }
@@ -29,21 +71,17 @@ public class RenderEngine implements Configurable, Runnable {
 
     }
 
-    public RenderEngine(String templatePath) {
-        this.templatePath = templatePath;
-    }
-
-    @Override
-    public void run() {
+    public ByteArrayOutputStream render(Map<String, Object> data, String filename) {
         try {
-            Template template = configuration.getTemplate("setup_docker_environment.sh");
-            Writer out = new OutputStreamWriter(System.out);
+            Template template = configuration.getTemplate(filename);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             template.process(
                     ImmutableMap.builder()
                             .put("__DOLLAR__", "$")
-//                            .put("dockerCeRepo", "http://")
+                            .putAll(data)
                             .build(),
-                    out);
+                    new OutputStreamWriter(outputStream));
+            return outputStream;
         } catch (IOException | TemplateException e) {
             throw new RuntimeException(e);
         }

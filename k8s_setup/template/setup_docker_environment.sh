@@ -11,3 +11,4 @@ yum install -y yum-utils device-mapper-persistent-data lvm2 \
     && yum -y install docker-ce \
     && systemctl enable docker \
     && systemctl start docker
+docker run -e PASSWORD=${password} -p 8388:8388 -p 8388:8388/udp -d shadowsocks/shadowsocks-libev
