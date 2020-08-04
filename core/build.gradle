@@ -1,3 +1,6 @@
+buildscript {
+    repositories aliyun_repositories
+}
 plugins {
     id 'org.inferred.processors' version '3.3.0'
     id "java"

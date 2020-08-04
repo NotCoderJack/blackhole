@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "tech.geekcity.blackhole.agent.proto";
+option java_outer_classname = "RouteGuideProto";
+option objc_class_prefix = "RTG";
+
+package proto;
+
+service CommandAgent {
+  rpc run(CommandBox) returns (CommandResult) {}
+}
+
+message CommandBox {
+  string executor = 1;
+  repeated string arguments = 2;
+}
+
+message CommandResult {
+  int32 exitValue = 1;
+  string standardOutput = 2;
+  string errorOutput = 3;
+  string exceptionStackTrace = 4;
+}

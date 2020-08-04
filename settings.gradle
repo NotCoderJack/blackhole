@@ -1,3 +1,4 @@
 rootProject.name = 'blackhole'
 include 'k8s_setup'
 include 'core'
+include 'agent'

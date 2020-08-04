@@ -1,21 +1,21 @@
 task buildAll {
     //dependsOn("shiro_example:bootJar")
 }
-allprojects {
-    buildscript {
-        repositories {
-            maven { url "https://maven.aliyun.com/repository/public" }
-            maven { url "https://maven.aliyun.com/repository/spring" }
-            maven { url "https://maven.aliyun.com/repository/mapr-public" }
-            maven { url "https://maven.aliyun.com/repository/spring-plugin" }
-            maven { url "https://maven.aliyun.com/repository/gradle-plugin" }
-            maven { url "https://maven.aliyun.com/repository/google" }
-            maven { url "https://maven.aliyun.com/repository/jcenter" }
+ext {
+    aliyun_repositories = {
+        maven { url "https://maven.aliyun.com/repository/public" }
+        maven { url "https://maven.aliyun.com/repository/spring" }
+        maven { url "https://maven.aliyun.com/repository/mapr-public" }
+        maven { url "https://maven.aliyun.com/repository/spring-plugin" }
+        maven { url "https://maven.aliyun.com/repository/gradle-plugin" }
+        maven { url "https://maven.aliyun.com/repository/google" }
+        maven { url "https://maven.aliyun.com/repository/jcenter" }
 
-            mavenLocal()
-            mavenCentral()
-        }
+        mavenLocal()
+        mavenCentral()
     }
+}
+allprojects {
     task printInfo {
         doLast {
             println("in $project.name version: $project.main_version")
