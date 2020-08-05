@@ -102,11 +102,11 @@ public abstract class CommandBoxRunner implements Runner {
         CommandLine commandLine = new CommandLine(commandBox.getExecutor());
         commandBox.getArgumentsList()
                 .forEach(commandLine::addArgument);
-        LOGGER.info("running command: {}", StringUtils.join(commandLine.toStrings(), " "));
         // TODO support files
         DefaultExecutor executor = new DefaultExecutor();
         executor.setStreamHandler(
                 new PumpStreamHandler(standardOutputStream, errorOutputStream));
+        LOGGER.info("running command: {}", StringUtils.join(commandLine.toStrings(), " "));
         try {
             int exitValue = executor.execute(commandLine);
             commandResult = CommandResult.newBuilder()

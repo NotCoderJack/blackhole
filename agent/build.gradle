@@ -40,9 +40,13 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
     implementation("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
     implementation("com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}")
+    // grpc packages: avoid sub-dependencies downloading from repo.maven.apache.org
+    implementation("io.grpc:grpc-api:${grpcVersion}")
+    implementation("io.grpc:grpc-core:${grpcVersion}")
     implementation("io.grpc:grpc-netty-shaded:${grpcVersion}")
     implementation("io.grpc:grpc-protobuf:${grpcVersion}")
     implementation("io.grpc:grpc-stub:${grpcVersion}")
+    implementation("info.picocli:picocli:4.5.0")
     // necessary for Java 9+
     compileOnly("org.apache.tomcat:annotations-api:6.0.53")
     testImplementation("junit:junit:4.12")
