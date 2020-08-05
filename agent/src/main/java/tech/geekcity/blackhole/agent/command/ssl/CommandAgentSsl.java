@@ -132,6 +132,11 @@ public abstract class CommandAgentSsl implements CommandAgent {
         }
     }
 
+    @Override
+    public String toJsonSilently() {
+        return this.toBuilder().toJsonSilently();
+    }
+
     private SslContext sslContextForServer() throws SSLException {
         String keyCertChainFilePath = keyCertChainFilePath();
         String keyFilePath = keyFilePath();

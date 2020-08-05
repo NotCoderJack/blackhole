@@ -6,4 +6,6 @@ public interface CommandAgent extends Runner {
     void blockUntilShutdown() throws InterruptedException;
 
     void stopGracefully();
+
+    String toJsonSilently();
 }

@@ -112,4 +112,9 @@ public abstract class CommandAgentDefault implements CommandAgent {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public String toJsonSilently() {
+        return this.toBuilder().toJsonSilently();
+    }
 }

@@ -24,12 +24,15 @@ dependencies {
     implementation("org.slf4j:slf4j-api:${slf4jVersion}")
     implementation("org.freemarker:freemarker:2.3.9")
     implementation("info.picocli:picocli:4.5.0")
+    // TODO use logback
+    implementation("org.slf4j:slf4j-simple:${slf4jVersion}")
     testImplementation("junit:junit:4.12")
     testImplementation("org.slf4j:slf4j-simple:${slf4jVersion}")
 }
 test {
     useJUnit()
 }
+def jarName = "${project.getName()}-with-dependencies"
 jar {
     manifest {
         attributes(
@@ -38,7 +41,7 @@ jar {
                 'Main-Class': 'tech.geekcity.blackhole.dist.EntryPoint'
         )
     }
-    setArchivesBaseName("${project.getName()}-${project.getVersion()}-with-dependencies.jar")
+    setArchivesBaseName(jarName)
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
@@ -47,9 +50,8 @@ jar {
 task runAgent(type: Exec) {
     executable("java")
     args(
-            String.format("-Dspring.config.location=%s", project.file("application.yaml")),
-            "-jar", project.file(String.format("build/libs/%s-%s.jar", project.getName(), project.getVersion())),
-            project.file("template"),
+            "-jar", project.file(String.format("build/libs/%s-${project.getVersion()}.jar", jarName)),
+            "--port", 8888,
     )
     doFirst {
         println(String.join(" ", getCommandLine()))
