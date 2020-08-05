@@ -3,7 +3,7 @@ package tech.geekcity.blackhole.dist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
-import tech.geekcity.blackhole.agent.command.CommandAgent;
+import tech.geekcity.blackhole.agent.command.ssl.CommandAgentSsl;
 
 import java.io.File;
 import java.util.concurrent.Callable;
@@ -28,16 +28,16 @@ public class EntryPoint implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        try (CommandAgent commandAgent = CommandAgent.Builder.newInstance()
+        try (CommandAgentSsl commandAgentSsl = CommandAgentSsl.Builder.newInstance()
                 .keyCertChainFilePath(keyCertChainFile.getAbsolutePath())
                 .keyFilePath(keyFile.getAbsolutePath())
                 .trustCertCollectionFilePath(trustCertCollectionFile.getAbsolutePath())
                 .port(port)
                 .build()) {
-            commandAgent.open();
-            LOGGER.info("running commandAgent: {}", commandAgent.toBuilder().toJsonSilently());
-            commandAgent.run();
-            commandAgent.blockUntilShutdown();
+            commandAgentSsl.open();
+            LOGGER.info("running commandAgentSsl: {}", commandAgentSsl.toBuilder().toJsonSilently());
+            commandAgentSsl.run();
+            commandAgentSsl.blockUntilShutdown();
             return 0;
         } catch (Exception e) {
             return -1;
