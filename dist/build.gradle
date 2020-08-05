@@ -1,0 +1,59 @@
+buildscript {
+    repositories aliyun_repositories
+}
+plugins {
+    id "org.inferred.processors" version "3.3.0"
+    id "java"
+}
+
+group = String.format("%s.%s", project.main_group, project.getName())
+version = project.main_version
+sourceCompatibility = project.java_version
+targetCompatibility = project.java_version
+
+repositories.clear()
+repositories.addAll(buildscript.repositories)
+
+def slf4jVersion = "1.7.15"
+dependencies {
+    implementation(project(":core"))
+    implementation(project(":agent"))
+    processor "org.inferred:freebuilder:2.6.1"
+    implementation("com.google.guava:guava:29.0-jre")
+    implementation("org.apache.commons:commons-lang3:3.0")
+    implementation("org.slf4j:slf4j-api:${slf4jVersion}")
+    implementation("org.freemarker:freemarker:2.3.9")
+    implementation("info.picocli:picocli:4.5.0")
+    // TODO use logback
+    implementation("org.slf4j:slf4j-simple:${slf4jVersion}")
+    testImplementation("junit:junit:4.12")
+    testImplementation("org.slf4j:slf4j-simple:${slf4jVersion}")
+}
+test {
+    useJUnit()
+}
+def jarName = "${project.getName()}-with-dependencies"
+jar {
+    manifest {
+        attributes(
+                'Implementation-Title': 'blackhole.dist',
+                'Implementation-Version': project.getVersion(),
+                'Main-Class': 'tech.geekcity.blackhole.dist.EntryPoint'
+        )
+    }
+    setArchivesBaseName(jarName)
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+task runAgent(type: Exec) {
+    executable("java")
+    args(
+            "-jar", project.file(String.format("build/libs/%s-${project.getVersion()}.jar", jarName)),
+            "--port", 8888,
+    )
+    doFirst {
+        println(String.join(" ", getCommandLine()))
+    }
+}

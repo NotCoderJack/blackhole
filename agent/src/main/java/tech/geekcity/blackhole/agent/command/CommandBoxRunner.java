@@ -11,8 +11,8 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.inferred.freebuilder.FreeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.geekcity.blackhole.agent.proto.CommandBox;
-import tech.geekcity.blackhole.agent.proto.CommandResult;
+import tech.geekcity.blackhole.agent.command.grpc.CommandBox;
+import tech.geekcity.blackhole.agent.command.grpc.CommandResult;
 import tech.geekcity.blackhole.core.Runner;
 
 import javax.annotation.Nullable;
