@@ -6,3 +6,4 @@ gradle-app.setting
 gradle/pkg/
 gradle/user/
 .idea/
+.runtime/
