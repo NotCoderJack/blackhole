@@ -1,4 +1,4 @@
-package tech.geekcity.blackhole.agent;
+package tech.geekcity.blackhole.dist;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,9 +9,9 @@ import java.io.File;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(
-        name = "agent",
+        name = "dist",
         mixinStandardHelpOptions = true,
-        description = "agent")
+        description = "dist")
 public class EntryPoint implements Callable<Integer> {
     private static final Logger LOGGER = LoggerFactory.getLogger(EntryPoint.class.getName());
     @CommandLine.Option(names = {"--keyCertChainFile"}, description = "keyCertChainFile for server")

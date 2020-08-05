@@ -21,7 +21,6 @@ sourceSets {
         java {
             srcDirs "build/generated/source/proto/main/grpc"
             srcDirs "build/generated/source/proto/main/java"
-            srcDirs "build/generated/sources/annotationProcessor/java/main"
         }
     }
 }
@@ -69,30 +68,5 @@ protobuf {
         all()*.plugins {
             grpc {}
         }
-    }
-}
-jar {
-    manifest {
-        attributes(
-                'Implementation-Title': 'blackhole.agent',
-                'Implementation-Version': project.getVersion(),
-                'Main-Class': 'tech.geekcity.blackhole.agent.EntryPoint'
-        )
-    }
-    setArchivesBaseName("${project.getName()}-${project.getVersion()}-with-dependencies.jar")
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-}
-
-task runJar(type: Exec) {
-    executable("java")
-    args(
-            String.format("-Dspring.config.location=%s", project.file("application.yaml")),
-            "-jar", project.file(String.format("build/libs/%s-%s.jar", project.getName(), project.getVersion())),
-            project.file("template"),
-    )
-    doFirst {
-        println(String.join(" ", getCommandLine()))
     }
 }

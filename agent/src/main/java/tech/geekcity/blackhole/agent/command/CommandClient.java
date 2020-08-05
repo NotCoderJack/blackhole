@@ -11,9 +11,9 @@ import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import org.inferred.freebuilder.FreeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.geekcity.blackhole.agent.proto.CommandAgentGrpc;
-import tech.geekcity.blackhole.agent.proto.CommandBox;
-import tech.geekcity.blackhole.agent.proto.CommandResult;
+import tech.geekcity.blackhole.agent.command.grpc.CommandAgentGrpc;
+import tech.geekcity.blackhole.agent.command.grpc.CommandBox;
+import tech.geekcity.blackhole.agent.command.grpc.CommandResult;
 import tech.geekcity.blackhole.core.Configurable;
 
 import javax.annotation.Nullable;

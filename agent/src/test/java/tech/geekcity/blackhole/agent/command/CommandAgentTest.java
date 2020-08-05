@@ -4,8 +4,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.geekcity.blackhole.agent.proto.CommandBox;
-import tech.geekcity.blackhole.agent.proto.CommandResult;
+import tech.geekcity.blackhole.agent.command.grpc.CommandBox;
+import tech.geekcity.blackhole.agent.command.grpc.CommandResult;
 import tech.geekcity.blackhole.agent.util.SslFileGenerator;
 
 import javax.net.ssl.SSLException;
@@ -39,7 +39,7 @@ public class CommandAgentTest {
                 try {
                     LOGGER.info("thread waiting 30 seconds");
                     TimeUnit.SECONDS.sleep(5);
-                    LOGGER.info("thread stopping command agent");
+                    LOGGER.info("thread stopping command dist");
                     commandAgent.stopGracefully();
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
