@@ -6,22 +6,14 @@ import org.apache.sshd.client.channel.ClientChannelEvent;
 import org.apache.sshd.client.keyverifier.AcceptAllServerKeyVerifier;
 import org.apache.sshd.client.keyverifier.DefaultKnownHostsServerKeyVerifier;
 import org.apache.sshd.client.session.ClientSession;
-import org.apache.sshd.common.util.security.SecurityUtils;
 import org.junit.Test;
-import sun.security.rsa.RSAKeyPairGenerator;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.KeyPairGenerator;
 import java.util.EnumSet;
 
 public class TestSsh {
     @Test
-    public void test() throws IOException, GeneralSecurityException {
-        KeyPairGenerator keyPairGenerator = SecurityUtils.getKeyPairGenerator("RSA");
-        new RSAKeyPairGenerator().generateKeyPair();
-
-
+    public void test() throws IOException {
         SshClient client = SshClient.setUpDefaultClient();
         client.setServerKeyVerifier(new DefaultKnownHostsServerKeyVerifier(AcceptAllServerKeyVerifier.INSTANCE));
         client.start();

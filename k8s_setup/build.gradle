@@ -41,7 +41,7 @@ task runJar(type: Exec) {
             project.file("template"),
     )
     doFirst {
-        println(String.join(" ", getCommandLine()))
+        println(String.format("running command: %s", String.join(" ", getCommandLine())))
     }
     dependsOn(bootJar)
 }

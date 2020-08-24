@@ -54,6 +54,47 @@ task runAgent(type: Exec) {
             "--port", 8888,
     )
     doFirst {
-        println(String.join(" ", getCommandLine()))
+        println(String.format("running command: %s", String.join(" ", getCommandLine())))
     }
+}
+
+// ********************** build docker images **********************
+def httpProxy = java.util.Optional.ofNullable(System.getenv("http_proxy")).orElse("")
+def httpsProxy = java.util.Optional.ofNullable(System.getenv("https_proxy")).orElse("")
+def baseImageName = "blackhole_base:${project.getVersion()}"
+task buildBaseDim(type: Exec) {
+    executable("docker")
+    args(
+            "build", "${project.file("dim/base")}",
+            "-f", "${project.file("dim/base/base.centos.dockerfile")}",
+            "--build-arg", "http_proxy=${httpProxy}",
+            "--build-arg", "https_proxy=${httpsProxy}",
+            "-t", baseImageName,
+    )
+    doFirst {
+        println(String.format("running command: %s", String.join(" ", getCommandLine())))
+    }
+}
+def sshdImageName = "blackhole_sshd:${project.getVersion()}"
+task buildSshdDim(type: Exec) {
+    executable("docker")
+    args(
+            "build", "${project.file("dim/base")}",
+            "-f", "${project.file("dim/sshd/sshd.dockerfile")}",
+            "--build-arg", "http_proxy=${httpProxy}",
+            "--build-arg", "https_proxy=${httpsProxy}",
+            "--build-arg", "BASE_IMAGE=${baseImageName}",
+            "-t", sshdImageName,
+    )
+    doFirst {
+        println(String.format("running command: %s", String.join(" ", getCommandLine())))
+    }
+    doLast {
+        def sshdDockerName = "sshd_server"
+        def sshdPort = "2222"
+        println("run sshd docker image: docker run --rm -p ${sshdPort}:22 --name ${sshdDockerName} -d blackhole_sshd:v1.0.0")
+        println("access with ssh client: ssh -i ${project.file("dim/sshd/id_rsa")} -p ${sshdPort} root@localhost")
+        println("stop sshd docker image: docker kill ${sshdDockerName}")
+    }
+    dependsOn(buildBaseDim)
 }
