@@ -11,20 +11,22 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.KeyPair;
 import java.util.EnumSet;
 
 public class TestSsh {
     @Test
-    public void test() throws IOException {
+    public void test() throws IOException, ClassNotFoundException {
+        byte[] keyPairDataBytes = FileUtils.readFileToByteArray(new File("../dist/dim/sshd/id_rsa.key.pair"));
+        KeyPair keyPair = RsaKeyPairWrap.deserialize(keyPairDataBytes).keyPair();
         SshClient client = SshClient.setUpDefaultClient();
         client.setServerKeyVerifier(new DefaultKnownHostsServerKeyVerifier(AcceptAllServerKeyVerifier.INSTANCE));
         client.start();
-        try (ClientSession session = client.connect("ben.wangz", "node01", 22)
+        try (ClientSession session = client.connect("root", "localhost", 2222)
                 .verify()
                 .getSession()) {
-            session.addPasswordIdentity("12345678");
+            session.addPublicKeyIdentity(keyPair);
             session.auth().verify();
-
             try (ClientChannel channel = session.createExecChannel("hostname")) {
                 channel.setOut(System.out);
                 channel.setErr(System.err);
@@ -34,18 +36,5 @@ public class TestSsh {
         }
         client.stop();
         client.close();
-    }
-
-    @Test
-    public void testSave() throws IOException {
-        try (RsaKeyPairGenerator rsaKeyPairGenerator = RsaKeyPairGenerator.Builder.newInstance()
-                .user("ben.wangz@some.net.com")
-                .build()) {
-            rsaKeyPairGenerator.open();
-            FileUtils.writeStringToFile(
-                    new File("/Users/ben.wangz/temp/id_rsa"),
-                    rsaKeyPairGenerator.privateKeyAsString());
-            System.out.println(rsaKeyPairGenerator.publicKeyAsString());
-        }
     }
 }

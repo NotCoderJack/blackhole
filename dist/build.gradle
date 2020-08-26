@@ -59,6 +59,21 @@ task runAgent(type: Exec) {
         println(String.format("running command: %s", String.join(" ", getCommandLine())))
     }
 }
+task generateRsaKeyFiles(type: Exec) {
+    executable("java")
+    args(
+            "-jar", project.file("build/libs/${jarName}-${project.getVersion()}.jar"),
+            "tech.geekcity.blackhole.dist.RsaKeyGenerator",
+            "--idRsaFile", project.file("dim/sshd/id_rsa").getAbsolutePath(),
+            "--idRsaPubFile", project.file("dim/sshd/id_rsa.pub").getAbsolutePath(),
+            "--keyPairFile", project.file("dim/sshd/id_rsa.key.pair").getAbsolutePath(),
+            "--overwrite",
+    )
+    doFirst {
+        println(String.format("running command: %s", String.join(" ", getCommandLine())))
+    }
+    dependsOn(assemble)
+}
 
 // ********************** build docker images **********************
 def httpProxy = java.util.Optional.ofNullable(System.getenv("http_proxy")).orElse("")
@@ -81,8 +96,8 @@ def sshdImageName = "blackhole_sshd:${project.getVersion()}"
 task buildSshdDim(type: Exec) {
     executable("docker")
     args(
-            "build", "${project.file("dim/base")}",
-            "-f", "${project.file("dim/sshd/sshd.dockerfile")}",
+            "build", project.file("dim/base").getAbsolutePath(),
+            "-f", project.file("dim/sshd/sshd.dockerfile").getAbsolutePath(),
             "--build-arg", "http_proxy=${httpProxy}",
             "--build-arg", "https_proxy=${httpsProxy}",
             "--build-arg", "BASE_IMAGE=${baseImageName}",
@@ -91,12 +106,42 @@ task buildSshdDim(type: Exec) {
     doFirst {
         println(String.format("running command: %s", String.join(" ", getCommandLine())))
     }
-    doLast {
-        def sshdDockerName = "sshd_server"
-        def sshdPort = "2222"
-        println("run sshd docker image: docker run --rm -p ${sshdPort}:22 --name ${sshdDockerName} -d blackhole_sshd:v1.0.0")
-        println("access with ssh client: ssh -i ${project.file("dim/sshd/id_rsa")} -p ${sshdPort} root@localhost")
-        println("stop sshd docker image: docker kill ${sshdDockerName}")
-    }
     dependsOn(buildBaseDim)
+}
+// ********************** running test envrionment with docker **********************
+def sshdDockerName = "sshd_server"
+def sshdPort = "2222"
+task runSshd(type: Exec) {
+    executable("docker")
+    args(
+            "run",
+            "--rm",
+            "-p", "${sshdPort}:22",
+            "--name", sshdDockerName,
+            "-d", sshdImageName,
+    )
+    doFirst {
+        println(String.format("running command: %s", String.join(" ", getCommandLine())))
+    }
+    doLast {
+        exec {
+            commandLine(
+                    "docker", "exec", "--", "${sshdDockerName}",
+                    "bash", "-c",
+                    "echo ${project.file("dim/sshd/id_rsa.pub").getText()} >> /root/.ssh/authorized_keys",
+            )
+        }
+        println("access with ssh client: ssh -i ${project.file("dim/sshd/id_rsa")} -p ${sshdPort} root@localhost")
+    }
+    dependsOn(generateRsaKeyFiles)
+}
+task stopSshd(type: Exec) {
+    executable("docker")
+    args(
+            "kill",
+            sshdDockerName,
+    )
+    doFirst {
+        println(String.format("running command: %s", String.join(" ", getCommandLine())))
+    }
 }

@@ -3,8 +3,6 @@ buildscript {
 }
 plugins {
     id 'org.inferred.processors' version '3.3.0'
-    id "org.springframework.boot" version "2.2.2.RELEASE"
-    id "io.spring.dependency-management" version "1.0.8.RELEASE"
     id "java"
 }
 
@@ -16,13 +14,14 @@ targetCompatibility = project.java_version
 repositories.clear()
 repositories.addAll(buildscript.repositories)
 
+def jacksonVersion = "2.9.8"
 dependencies {
     implementation(project(":core"))
-    implementation(project(":render"))
     processor 'org.inferred:freebuilder:2.6.1'
+    implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
+    implementation("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}")
     implementation("com.google.guava:guava:29.0-jre")
-    implementation("org.apache.commons:commons-lang3:3.0")
-    implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.freemarker:freemarker:2.3.9")
     testImplementation("junit:junit:4.12")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
@@ -32,17 +31,4 @@ dependencies {
 
 test {
     useJUnitPlatform()
-}
-
-task runJar(type: Exec) {
-    executable("java")
-    args(
-            String.format("-Dspring.config.location=%s", project.file("application.yaml")),
-            "-jar", project.file(String.format("build/libs/%s-%s.jar", project.getName(), project.getVersion())),
-            project.file("template"),
-    )
-    doFirst {
-        println(String.format("running command: %s", String.join(" ", getCommandLine())))
-    }
-    dependsOn(bootJar)
 }
