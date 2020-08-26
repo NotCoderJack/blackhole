@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import tech.geekcity.blackhole.k8s_setup.configuration.RenderEngine;
+import tech.geekcity.blackhole.render.RenderEngine;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
