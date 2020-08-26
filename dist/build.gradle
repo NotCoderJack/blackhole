@@ -18,12 +18,14 @@ def slf4jVersion = "1.7.15"
 dependencies {
     implementation(project(":core"))
     implementation(project(":agent"))
+    implementation(project(":ssh"))
     processor "org.inferred:freebuilder:2.6.1"
     implementation("com.google.guava:guava:29.0-jre")
     implementation("org.apache.commons:commons-lang3:3.0")
     implementation("org.slf4j:slf4j-api:${slf4jVersion}")
     implementation("org.freemarker:freemarker:2.3.9")
     implementation("info.picocli:picocli:4.5.0")
+    implementation("commons-io:commons-io:2.4")
     // TODO use logback
     implementation("org.slf4j:slf4j-simple:${slf4jVersion}")
     testImplementation("junit:junit:4.12")
