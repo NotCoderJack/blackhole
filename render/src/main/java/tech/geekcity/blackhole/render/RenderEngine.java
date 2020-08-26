@@ -1,4 +1,4 @@
-package tech.geekcity.blackhole.k8s_setup.configuration;
+package tech.geekcity.blackhole.render;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -52,7 +52,9 @@ public class RsaKeyGenerator implements Callable<Integer> {
             FileUtils.writeStringToFile(idRsaFile, rsaKeyPairGenerator.rsaKeyPairWrap().privateKeyAsString());
             FileUtils.writeStringToFile(idRsaPubFile, rsaKeyPairGenerator.rsaKeyPairWrap().publicKeyAsString(user));
             FileUtils.writeByteArrayToFile(keyPairFile, rsaKeyPairGenerator.rsaKeyPairWrap().serialize());
-            Files.setPosixFilePermissions(idRsaFile.toPath(), ImmutableSet.of(PosixFilePermission.OWNER_READ));
+            Files.setPosixFilePermissions(
+                    idRsaFile.toPath(),
+                    ImmutableSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE));
             return 0;
         }
     }
