@@ -49,32 +49,6 @@ jar {
     }
 }
 
-task runAgent(type: Exec) {
-    executable("java")
-    args(
-            "-jar", project.file(String.format("build/libs/%s-${project.getVersion()}.jar", jarName)),
-            "--port", 8888,
-    )
-    doFirst {
-        println(String.format("running command: %s", String.join(" ", getCommandLine())))
-    }
-}
-task generateRsaKeyFiles(type: Exec) {
-    executable("java")
-    args(
-            "-jar", project.file("build/libs/${jarName}-${project.getVersion()}.jar"),
-            "tech.geekcity.blackhole.dist.RsaKeyGenerator",
-            "--idRsaFile", project.file("dim/sshd/id_rsa").getAbsolutePath(),
-            "--idRsaPubFile", project.file("dim/sshd/id_rsa.pub").getAbsolutePath(),
-            "--keyPairFile", project.file("dim/sshd/id_rsa.key.pair").getAbsolutePath(),
-            "--overwrite",
-    )
-    doFirst {
-        println(String.format("running command: %s", String.join(" ", getCommandLine())))
-    }
-    dependsOn(assemble)
-}
-
 // ********************** build docker images **********************
 def httpProxy = java.util.Optional.ofNullable(System.getenv("http_proxy")).orElse("")
 def httpsProxy = java.util.Optional.ofNullable(System.getenv("https_proxy")).orElse("")
@@ -109,6 +83,22 @@ task buildSshdDim(type: Exec) {
     dependsOn(buildBaseDim)
 }
 // ********************** running test envrionment with docker **********************
+def keyPairFilePath = project.file("dim/sshd/id_rsa.key.pair").getAbsolutePath()
+task generateRsaKeyFiles(type: Exec) {
+    executable("java")
+    args(
+            "-jar", project.file("build/libs/${jarName}-${project.getVersion()}.jar"),
+            "tech.geekcity.blackhole.dist.RsaKeyGenerator",
+            "--idRsaFile", project.file("dim/sshd/id_rsa").getAbsolutePath(),
+            "--idRsaPubFile", project.file("dim/sshd/id_rsa.pub").getAbsolutePath(),
+            "--keyPairFile", keyPairFilePath,
+            // "--overwrite",
+    )
+    doFirst {
+        println(String.format("running command: %s", String.join(" ", getCommandLine())))
+    }
+    dependsOn(assemble)
+}
 def sshdDockerName = "sshd_server"
 def sshdPort = "2222"
 task runSshd(type: Exec) {
@@ -133,7 +123,6 @@ task runSshd(type: Exec) {
         }
         println("access with ssh client: ssh -i ${project.file("dim/sshd/id_rsa")} -p ${sshdPort} root@localhost")
     }
-    dependsOn(generateRsaKeyFiles)
 }
 task stopSshd(type: Exec) {
     executable("docker")
@@ -144,4 +133,24 @@ task stopSshd(type: Exec) {
     doFirst {
         println(String.format("running command: %s", String.join(" ", getCommandLine())))
     }
+}
+// ********************** temp tasks(will be removed) **********************
+task copyDistJarToRemote(type: Exec) {
+    def distJar = project.file("build/libs/${jarName}-${project.getVersion()}.jar")
+    executable("java")
+    args(
+            "-jar", distJar.getAbsolutePath(),
+            "tech.geekcity.blackhole.dist.RemoteFileTransfer",
+            "--username", "root",
+            "--remoteHost", "localhost",
+            "--remotePort", sshdPort,
+            "--keyPairFile", keyPairFilePath,
+            "--transferType", "upload",
+            "--localFile", distJar.getAbsolutePath(),
+            "--remoteFile", "/tmp/${distJar.getName()}",
+    )
+    doFirst {
+        println(String.format("running command: %s", String.join(" ", getCommandLine())))
+    }
+    dependsOn(assemble)
 }
