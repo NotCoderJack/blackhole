@@ -16,6 +16,7 @@ repositories.addAll(buildscript.repositories)
 
 def slf4jVersion = "1.7.15"
 def jacksonVersion = "2.9.8"
+def minaSshVersion = "2.5.1"
 dependencies {
     implementation(project(":core"))
     processor "org.inferred:freebuilder:2.6.1"
@@ -25,7 +26,8 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
     implementation("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
     implementation("com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}")
-    implementation("org.apache.sshd:sshd-core:2.5.1")
+    implementation("org.apache.sshd:sshd-core:${minaSshVersion}")
+    implementation("org.apache.sshd:sshd-scp:${minaSshVersion}")
     implementation("commons-io:commons-io:2.4")
     testImplementation("junit:junit:4.12")
     testImplementation("org.slf4j:slf4j-simple:${slf4jVersion}")

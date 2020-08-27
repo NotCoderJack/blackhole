@@ -1,7 +1,7 @@
 ARG BASE_IMAGE=blackhole_base
 FROM $BASE_IMAGE
 RUN set -x \
-    && yum -y install openssh-server \
+    && yum -y install openssh-server openssh-clients \
     && ssh-keygen -b 1024 -t rsa -f /etc/ssh/ssh_host_rsa_key -N "" \
     && mkdir -p /root/.ssh \
     && chmod 700 /root/.ssh \

@@ -21,11 +21,11 @@ public class RsaKeyGenerator implements Callable<Integer> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RsaKeyGenerator.class);
     @CommandLine.Option(names = {"--keySize"}, description = "rsa key size", defaultValue = "2048")
     private int keySize;
-    @CommandLine.Option(names = {"--idRsaFile"}, description = "path for id_rsa file")
+    @CommandLine.Option(names = {"--idRsaFile"}, description = "path for id_rsa file", required = true)
     private File idRsaFile;
-    @CommandLine.Option(names = {"--idRsaPubFile"}, description = "path for id_rsa.pub file")
+    @CommandLine.Option(names = {"--idRsaPubFile"}, description = "path for id_rsa.pub file", required = true)
     private File idRsaPubFile;
-    @CommandLine.Option(names = {"--keyPairFile"}, description = "key pair serialized file")
+    @CommandLine.Option(names = {"--keyPairFile"}, description = "key pair serialized file", required = true)
     private File keyPairFile;
     @CommandLine.Option(names = {"--overwrite"}, description = "overwrite existing file", defaultValue = "false")
     private boolean overwriteExistingFile;

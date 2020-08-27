@@ -1,40 +1,106 @@
 package tech.geekcity.blackhole.ssh;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.sshd.client.SshClient;
-import org.apache.sshd.client.channel.ClientChannel;
-import org.apache.sshd.client.channel.ClientChannelEvent;
-import org.apache.sshd.client.keyverifier.AcceptAllServerKeyVerifier;
-import org.apache.sshd.client.keyverifier.DefaultKnownHostsServerKeyVerifier;
-import org.apache.sshd.client.session.ClientSession;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.security.KeyPair;
-import java.util.EnumSet;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class TestSsh {
-    @Test
-    public void test() throws IOException, ClassNotFoundException {
+    private static final String REMOTE_TEMP_DIRECTORY = "/tmp";
+    private transient String localTempDirectory;
+    private transient KeyPair keyPair;
+
+    @Before
+    public void setUp() throws IOException, ClassNotFoundException {
+        //
+        localTempDirectory = System.getProperty("java.io.tmpdir");
         byte[] keyPairDataBytes = FileUtils.readFileToByteArray(new File("../dist/dim/sshd/id_rsa.key.pair"));
-        KeyPair keyPair = RsaKeyPairWrap.deserialize(keyPairDataBytes).keyPair();
-        SshClient client = SshClient.setUpDefaultClient();
-        client.setServerKeyVerifier(new DefaultKnownHostsServerKeyVerifier(AcceptAllServerKeyVerifier.INSTANCE));
-        client.start();
-        try (ClientSession session = client.connect("root", "localhost", 2222)
-                .verify()
-                .getSession()) {
-            session.addPublicKeyIdentity(keyPair);
-            session.auth().verify();
-            try (ClientChannel channel = session.createExecChannel("hostname")) {
-                channel.setOut(System.out);
-                channel.setErr(System.err);
-                channel.open().verify();
-                channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0L);
-            }
+        keyPair = RsaKeyPairWrap.deserialize(keyPairDataBytes).keyPair();
+    }
+
+    @After
+    public void tearDown() {
+        localTempDirectory = null;
+        keyPair = null;
+    }
+
+    @Test
+    public void testCommand() throws IOException {
+        try (SshCommander sshCommander = SshCommander.Builder.newInstance()
+                .sshClientWrap(SshClientWrap.Builder.newInstance()
+                        .username("root")
+                        .host("localhost")
+                        .port(2222)
+                        .keyPair(keyPair)
+                        .build())
+                .standardOutput(System.out)
+                .errorOutput(System.err)
+                .build()) {
+            sshCommander.open();
+            sshCommander.run("hostname");
+            sshCommander.run("hostname -i");
         }
-        client.stop();
-        client.close();
+    }
+
+    @Test
+    public void testCopy() throws IOException {
+        List<File> fileList = IntStream.range(0, 3)
+                .mapToObj(index -> {
+                    try {
+                        return createRandomTempFile();
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                }).collect(Collectors.toList());
+        try (SimpleScp simpleScp = SimpleScp.Builder.newInstance()
+                .sshClientWrap(SshClientWrap.Builder.newInstance()
+                        .username("root")
+                        .host("localhost")
+                        .port(2222)
+                        .keyPair(keyPair)
+                        .build())
+                .build()) {
+            simpleScp.open();
+            simpleScp.upload(
+                    fileList.stream()
+                            .map(File::getAbsolutePath)
+                            .collect(Collectors.toList()),
+                    REMOTE_TEMP_DIRECTORY);
+            simpleScp.download(
+                    fileList.stream()
+                            .map(file -> String.format("%s/%s", REMOTE_TEMP_DIRECTORY, file.getName()))
+                            .collect(Collectors.toList()),
+                    localTempDirectory);
+        }
+        fileList.forEach(file ->
+                new File(String.format("%s/%s", localTempDirectory, file.getName()))
+                        .deleteOnExit());
+        fileList.forEach(file -> {
+            try {
+                Assert.assertEquals(
+                        FileUtils.readFileToString(file),
+                        FileUtils.readFileToString(
+                                new File(String.format("%s/%s", localTempDirectory, file.getName()))));
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        });
+    }
+
+    private File createRandomTempFile() throws IOException {
+        File randomTempFile = File.createTempFile("random_temp_", ".txt");
+        randomTempFile.deleteOnExit();
+        FileUtils.writeStringToFile(randomTempFile, RandomStringUtils.randomAlphanumeric(128));
+        return randomTempFile;
     }
 }
