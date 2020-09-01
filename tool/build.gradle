@@ -38,9 +38,9 @@ def jarName = "${project.getName()}-with-dependencies"
 jar {
     manifest {
         attributes(
-                'Implementation-Title': 'blackhole.dist',
+                'Implementation-Title': 'blackhole.tool',
                 'Implementation-Version': project.getVersion(),
-                'Main-Class': 'tech.geekcity.blackhole.dist.EntryPoint'
+                'Main-Class': 'tech.geekcity.blackhole.tool.EntryPoint'
         )
     }
     setArchivesBaseName(jarName)
@@ -88,7 +88,7 @@ task generateRsaKeyFiles(type: Exec) {
     executable("java")
     args(
             "-jar", project.file("build/libs/${jarName}-${project.getVersion()}.jar"),
-            "tech.geekcity.blackhole.dist.RsaKeyGenerator",
+            "tech.geekcity.blackhole.tool.RsaKeyGenerator",
             "--idRsaFile", project.file("dim/sshd/id_rsa").getAbsolutePath(),
             "--idRsaPubFile", project.file("dim/sshd/id_rsa.pub").getAbsolutePath(),
             "--keyPairFile", keyPairFilePath,
@@ -135,19 +135,19 @@ task stopSshd(type: Exec) {
     }
 }
 // ********************** temp tasks(will be removed) **********************
-task copyDistJarToRemote(type: Exec) {
-    def distJar = project.file("build/libs/${jarName}-${project.getVersion()}.jar")
+task copyToolJarToRemote(type: Exec) {
+    def toolJar = project.file("build/libs/${jarName}-${project.getVersion()}.jar")
     executable("java")
     args(
-            "-jar", distJar.getAbsolutePath(),
-            "tech.geekcity.blackhole.dist.RemoteFileTransfer",
+            "-jar", toolJar.getAbsolutePath(),
+            "tech.geekcity.blackhole.tool.RemoteFileTransfer",
             "--username", "root",
             "--remoteHost", "localhost",
             "--remotePort", sshdPort,
             "--keyPairFile", keyPairFilePath,
             "--transferType", "upload",
-            "--localFile", distJar.getAbsolutePath(),
-            "--remoteFile", "/tmp/${distJar.getName()}",
+            "--localFile", toolJar.getAbsolutePath(),
+            "--remoteFile", "/tmp/${toolJar.getName()}",
     )
     doFirst {
         println(String.format("running command: %s", String.join(" ", getCommandLine())))

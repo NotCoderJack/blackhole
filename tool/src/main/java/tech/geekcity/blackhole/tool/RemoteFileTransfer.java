@@ -1,4 +1,4 @@
-package tech.geekcity.blackhole.dist;
+package tech.geekcity.blackhole.tool;
 
 import com.google.common.base.Preconditions;
 import org.apache.commons.io.FileUtils;
