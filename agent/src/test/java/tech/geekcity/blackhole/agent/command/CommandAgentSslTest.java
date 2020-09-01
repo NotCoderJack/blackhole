@@ -82,7 +82,7 @@ public class CommandAgentSslTest {
             try {
                 LOGGER.info("thread waiting 5 seconds");
                 TimeUnit.SECONDS.sleep(5);
-                LOGGER.info("thread stopping command dist");
+                LOGGER.info("thread stopping command tool");
                 commandAgent.stopGracefully();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);

@@ -24,7 +24,7 @@ public class TestSsh {
     public void setUp() throws IOException, ClassNotFoundException {
         //
         localTempDirectory = System.getProperty("java.io.tmpdir");
-        byte[] keyPairDataBytes = FileUtils.readFileToByteArray(new File("../dist/dim/sshd/id_rsa.key.pair"));
+        byte[] keyPairDataBytes = FileUtils.readFileToByteArray(new File("../tool/dim/sshd/id_rsa.key.pair"));
         keyPair = RsaKeyPairWrap.deserialize(keyPairDataBytes).keyPair();
     }
 
