@@ -1,5 +1,9 @@
 buildscript {
-    repositories aliyun_repositories
+    repositories {
+        for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+            maven { url(mavenRepositoryUrl) }
+        }
+    }
 }
 plugins {
     id 'org.inferred.processors' version '3.3.0'
@@ -8,17 +12,17 @@ plugins {
     id "java"
 }
 
-group = String.format("%s.%s", project.main_group, project.getName())
-version = project.main_version
-sourceCompatibility = project.java_version
-targetCompatibility = project.java_version
+group = project.rootProject.ext.constructGroupName("", project.getName())
+version = project.rootProject.constructVersion()
+sourceCompatibility = project.rootProject.ext.javaVersion
+targetCompatibility = project.rootProject.ext.javaVersion
 
 repositories.clear()
 repositories.addAll(buildscript.repositories)
 
 dependencies {
-    implementation(project(":core"))
-    implementation(project(":render"))
+    implementation(project.rootProject.project("lib:core"))
+    implementation(project.rootProject.project("lib:render"))
     processor 'org.inferred:freebuilder:2.6.1'
     implementation("com.google.guava:guava:29.0-jre")
     implementation("org.apache.commons:commons-lang3:3.0")

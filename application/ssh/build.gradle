@@ -1,0 +1,52 @@
+buildscript {
+    repositories {
+        for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+            maven { url(mavenRepositoryUrl) }
+        }
+    }
+}
+group = project.rootProject.ext.constructGroupName("application", project.getName())
+version = project.rootProject.constructVersion()
+
+/********************** build docker images **********************/
+def buildAbsolutePath = project.buildDir.getAbsolutePath()
+def buildDockerPath = "${buildAbsolutePath}/docker"
+def httpProxy = java.util.Optional.ofNullable(System.getenv("http_proxy")).orElse("")
+def httpsProxy = java.util.Optional.ofNullable(System.getenv("https_proxy")).orElse("")
+
+def keysDirectory = "${buildDockerPath}/keys"
+def privateKeyFile = project.file("${keysDirectory}/id_rsa")
+def publicKeyFile = project.file("${keysDirectory}/id_rsa.pub")
+task generateKeys {
+    doLast {
+        if (privateKeyFile.exists() && publicKeyFile.exists()) {
+            println("keys exists, do nothing...")
+            return
+        }
+        privateKeyFile.getParentFile().mkdirs()
+        exec {
+            commandLine(
+                    "ssh-keygen",
+                    "-t", "rsa",
+                    "-N", "",
+                    "-f", privateKeyFile.getAbsolutePath()
+            )
+        }
+    }
+}
+def imageName = "${project.rootProject.ext.dockerImageNamePrefix}_${project.getName()}:${project.getVersion()}"
+task buildImage(type: Exec) {
+    commandLine(
+            "docker",
+            "build", buildDockerPath,
+            "-f", "${project.file("docker/ssh.dockerfile")}",
+            "--build-arg", "http_proxy=${httpProxy}",
+            "--build-arg", "https_proxy=${httpsProxy}",
+            "-t", imageName,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(generateKeys)
+}
+/********************** build docker images ends **********************/
