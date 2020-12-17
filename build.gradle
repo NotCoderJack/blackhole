@@ -1,4 +1,7 @@
-def sshdKeyPath = "${project(":application:tool").buildDir.getAbsolutePath()}/keys"
+import org.codehaus.groovy.runtime.GStringImpl
+
+def sshdKeyPath = "${project.buildDir.getAbsolutePath()}/keys"
+def toolJarBaseNameLocal = "${project(":application:tool").getName()}-with-dependencies"
 ext {
     mainVersion = "v1.0.0"
     mainGroup = "teck.geekcity.blackhole"
@@ -35,6 +38,9 @@ ext {
     constructVersion = { ->
         return "${ext.mainVersion}_${ext.gitCommitId()}"
     }
+    constructDockerImageName = { coreName ->
+        return "${ext.dockerImageNamePrefix}_${coreName}:${ext.constructVersion()}"
+    }
     jarDependency = { group, artifact ->
         def slf4jVersion = "1.7.15"
         versionMapping = [
@@ -56,7 +62,10 @@ ext {
         }
         return "${key}:${version}"
     }
-    keyPairFilePath = "${sshdKeyPath}/id_rsa.key.pair"
-    idRsaFile = "${sshdKeyPath}/id_rsa"
-    idRsaPubFile = "${sshdKeyPath}/id_rsa.pub"
+    keyPairFilePath = "${sshdKeyPath}/id_rsa.key.pair" as GStringImpl
+    idRsaFile = "${sshdKeyPath}/id_rsa" as GStringImpl
+    idRsaPubFile = "${sshdKeyPath}/id_rsa.pub" as GStringImpl
+    toolJarBaseName = toolJarBaseNameLocal
+    toolJarPath = "${project(":application:tool").buildDir.getAbsolutePath()}/libs/" +
+            "${toolJarBaseNameLocal}-${project.rootProject.constructVersion()}.jar"
 }
