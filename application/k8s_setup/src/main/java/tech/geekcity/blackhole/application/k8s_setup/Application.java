@@ -1,4 +1,4 @@
-package tech.geekcity.blackhole.k8s_setup;
+package tech.geekcity.blackhole.application.k8s_setup;
 
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;

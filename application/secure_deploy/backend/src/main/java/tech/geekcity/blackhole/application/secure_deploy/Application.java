@@ -1,4 +1,4 @@
-package tech.geekcity.blackhole.secure_deploy;
+package tech.geekcity.blackhole.application.secure_deploy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

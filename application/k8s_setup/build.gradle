@@ -12,36 +12,41 @@ plugins {
     id "java"
 }
 
-group = project.rootProject.ext.constructGroupName("", project.getName())
+group = project.rootProject.ext.constructGroupName("application", project.getName())
 version = project.rootProject.constructVersion()
 sourceCompatibility = project.rootProject.ext.javaVersion
 targetCompatibility = project.rootProject.ext.javaVersion
 
-repositories {
-    for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
-        maven { url(mavenRepositoryUrl) }
-    }
-}
+repositories.clear()
+repositories.addAll(buildscript.repositories)
 
-def jacksonVersion = "2.9.8"
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("mysql:mysql-connector-java:8.0.21")
     processor("org.inferred:freebuilder:2.6.1")
-    implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
-    implementation("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}")
+    implementation(project.rootProject.project("lib:core"))
+    implementation(project.rootProject.project("lib:render"))
     implementation("com.google.guava:guava:29.0-jre")
     implementation("org.apache.commons:commons-lang3:3.0")
-
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.freemarker:freemarker:2.3.9")
     testImplementation("junit:junit:4.12")
-    testImplementation("com.h2database:h2:1.4.195")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude group: "org.junit.vintage", module: "junit-vintage-engine"
     }
 }
 
 test {
-    useJUnitPlatform()
+    useJUnit()
+}
+
+task runJar(type: Exec) {
+    executable("java")
+    args(
+            String.format("-Dspring.config.location=%s", project.file("application.yaml")),
+            "-jar", project.file(String.format("build/libs/%s-%s.jar", project.getName(), project.getVersion())),
+            project.file("template"),
+    )
+    doFirst {
+        println(String.format("running command: %s", String.join(" ", getCommandLine())))
+    }
+    dependsOn(bootJar)
 }
