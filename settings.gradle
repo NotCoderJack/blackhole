@@ -3,8 +3,11 @@ include "lib:core"
 include "lib:ssh"
 include "lib:agent"
 include "lib:render"
-include "application:ssh"
+
 include "application:tool"
+include "application:ssh"
+include "application:nfs"
+
 include "application:k8s_setup"
 include "application:secure_deploy:frontend"
 include "application:secure_deploy:backend"

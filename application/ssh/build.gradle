@@ -9,8 +9,8 @@ group = project.rootProject.ext.constructGroupName("application", project.getNam
 version = project.rootProject.constructVersion()
 
 def toolJarPath = project.rootProject.ext.toolJarPath
-/********************** build docker images **********************/
 def buildAbsolutePath = project.buildDir.getAbsolutePath()
+/********************** build docker images **********************/
 def buildDockerPath = "${buildAbsolutePath}/docker"
 def httpProxy = java.util.Optional.ofNullable(System.getenv("http_proxy")).orElse("")
 def httpsProxy = java.util.Optional.ofNullable(System.getenv("https_proxy")).orElse("")
@@ -61,6 +61,9 @@ def k8sYamlPath = "${buildAbsolutePath}/${project.file(k8sYamlTemplateFile).getN
 def nodePort = "30022"
 task generatePropertyFile() {
     doLast {
+        if (!propertyFile.parentFile.exists()) {
+            propertyFile.parentFile.mkdirs()
+        }
         propertyFile.text = [
                 "sshd_image_name=${imageName}",
                 "nodePort=${nodePort}"

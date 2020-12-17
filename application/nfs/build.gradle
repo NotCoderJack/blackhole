@@ -1,0 +1,70 @@
+buildscript {
+    repositories {
+        for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+            maven { url(mavenRepositoryUrl) }
+        }
+    }
+}
+group = project.rootProject.ext.constructGroupName("application", project.getName())
+version = project.rootProject.constructVersion()
+
+def toolJarPath = project.rootProject.ext.toolJarPath
+def buildAbsolutePath = project.buildDir.getAbsolutePath()
+/********************** k8s **********************/
+def imageName = "gists/nfs-server:2.4.3"
+def k8sYamlTemplateFile = project.file("k8s/nfs.yaml").getAbsolutePath()
+def propertyFile = project.file("${buildAbsolutePath}/render.properties")
+def k8sYamlPath = "${buildAbsolutePath}/${project.file(k8sYamlTemplateFile).getName()}"
+task generatePropertyFile() {
+    doLast {
+        if (!propertyFile.parentFile.exists()) {
+            propertyFile.parentFile.mkdirs()
+        }
+        propertyFile.text = [
+                "nfs_image_name=${imageName}",
+        ].join("\n")
+    }
+}
+task renderSshdYaml(type: Exec) {
+    commandLine(
+            "java",
+            "-jar", toolJarPath,
+            "tech.geekcity.blackhole.application.tool.RenderText",
+            "--templateFile", k8sYamlTemplateFile,
+            "--propertyFile", propertyFile,
+            "--outputFile", k8sYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(generatePropertyFile)
+    dependsOn(":application:tool:jar")
+}
+task applyK8s(type: Exec) {
+    commandLine(
+            "kubectl",
+            "-n", project.rootProject.ext.k8sNameSpace,
+            "apply",
+            "-f", k8sYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+        println("nfs test command(run in springboard machine): " +
+                "mount -v -t nfs -o vers=4,port=2049 nfs-service:/ /mnt"
+        )
+    }
+    dependsOn(renderSshdYaml)
+}
+task deleteK8s(type: Exec) {
+    commandLine(
+            "kubectl",
+            "-n", project.rootProject.ext.k8sNameSpace,
+            "delete",
+            "-f", k8sYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(renderSshdYaml)
+}
+/********************** k8s ends **********************/
