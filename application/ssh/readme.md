@@ -9,4 +9,6 @@
     * running the command print at previous step
     * for example
 
-    ```ssh -i /Users/ben.wangz/develop/blackhole/build/keys/id_rsa -p 30022 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@localhost```
+    ```
+    ssh -i /Users/ben.wangz/develop/blackhole/build/keys/id_rsa -p 30022 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@localhost
+   ```
