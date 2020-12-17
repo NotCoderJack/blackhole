@@ -15,24 +15,11 @@ def httpProxy = java.util.Optional.ofNullable(System.getenv("http_proxy")).orEls
 def httpsProxy = java.util.Optional.ofNullable(System.getenv("https_proxy")).orElse("")
 
 def keysDirectory = "${buildDockerPath}/keys"
-def privateKeyFile = project.file("${keysDirectory}/id_rsa")
-def publicKeyFile = project.file("${keysDirectory}/id_rsa.pub")
-task generateKeys {
-    doLast {
-        if (privateKeyFile.exists() && publicKeyFile.exists()) {
-            println("keys exists, do nothing...")
-            return
-        }
-        privateKeyFile.getParentFile().mkdirs()
-        exec {
-            commandLine(
-                    "ssh-keygen",
-                    "-t", "rsa",
-                    "-N", "",
-                    "-f", privateKeyFile.getAbsolutePath()
-            )
-        }
-    }
+task copyKeys(type: Copy) {
+    from(project.rootProject.ext.idRsaFile)
+    from(project.rootProject.ext.idRsaPubFile)
+    into(keysDirectory)
+    dependsOn(":application:tool:generateRsaKeyFiles")
 }
 def imageName = "${project.rootProject.ext.dockerImageNamePrefix}_${project.getName()}:${project.getVersion()}"
 task buildImage(type: Exec) {
@@ -47,6 +34,6 @@ task buildImage(type: Exec) {
     doFirst {
         println("running command: ${String.join(" ", getCommandLine())}")
     }
-    dependsOn(generateKeys)
+    dependsOn(copyKeys)
 }
 /********************** build docker images ends **********************/

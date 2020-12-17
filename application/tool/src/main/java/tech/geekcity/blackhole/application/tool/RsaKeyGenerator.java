@@ -29,6 +29,8 @@ public class RsaKeyGenerator implements Callable<Integer> {
     private File keyPairFile;
     @CommandLine.Option(names = {"--overwrite"}, description = "overwrite existing file", defaultValue = "false")
     private boolean overwriteExistingFile;
+    @CommandLine.Option(names = {"--existsDoNothing"}, description = "overwrite existing file", defaultValue = "true")
+    private boolean existsDoNothing;
     @CommandLine.Option(names = {"--user"}, description = "user description", defaultValue = "auto-gen-user@blackhole")
     private String user;
 
@@ -39,6 +41,15 @@ public class RsaKeyGenerator implements Callable<Integer> {
                 .build()) {
             rsaKeyPairGenerator.open();
             // TODO check exists
+            if (idRsaFile.exists() && idRsaPubFile.exists() && existsDoNothing) {
+                LOGGER.info(
+                        "DO NOTHING: idRsaFile({}) and idRsaPubFile({}) exists, existsDoNothing({})",
+                        idRsaFile.getAbsolutePath(),
+                        idRsaPubFile.getAbsolutePath(),
+                        existsDoNothing
+                );
+                return 0;
+            }
             if (!overwriteExistingFile && idRsaFile.exists()) {
                 LOGGER.error(
                         "idRsaFile({}) exists! use --overwrite true to overwrite", idRsaFile.getAbsolutePath());
