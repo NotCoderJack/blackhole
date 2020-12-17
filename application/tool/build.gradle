@@ -25,6 +25,7 @@ dependencies {
     implementation(project.rootProject.project("lib:core"))
     implementation(project.rootProject.project("lib:agent"))
     implementation(project.rootProject.project("lib:ssh"))
+    implementation(project.rootProject.project("lib:render"))
     processor(project.rootProject.ext.jarDependency("org.inferred", "freebuilder"))
     implementation(project.rootProject.ext.jarDependency("com.google.guava", "guava"))
     implementation(project.rootProject.ext.jarDependency("org.apache.commons", "commons-lang3"))
@@ -40,7 +41,7 @@ dependencies {
 test {
     useJUnit()
 }
-def jarBaseName = "${project.getName()}-with-dependencies"
+def jarBaseName = project.rootProject.ext.toolJarBaseName
 jar {
     manifest {
         attributes(
@@ -55,40 +56,23 @@ jar {
     }
 }
 
-def toolJarName = "${jarBaseName}-${project.getVersion()}.jar"
-def toolJar = project.file("${project.buildDir.getAbsolutePath()}/libs/${toolJarName}")
+def toolJarPath = project.rootProject.ext.toolJarPath
 def sshdPort = 2222
-task generateRsaKeyFiles(type: Exec) {
-    commandLine(
-            "java",
-            "-jar", toolJar,
-            "tech.geekcity.blackhole.application.tool.RsaKeyGenerator",
-            "--idRsaFile", project.rootProject.ext.idRsaFile,
-            "--idRsaPubFile", project.rootProject.ext.idRsaPubFile,
-            "--keyPairFile", project.rootProject.ext.keyPairFilePath,
-            // "--existsDoNothing", "false"
-            // "--overwrite",
-    )
-    doFirst {
-        println("running command: ${String.join(" ", getCommandLine())}")
-    }
-    dependsOn(jar)
-}
 task copyToolJarToRemote(type: Exec) {
     executable("java")
     args(
-            "-jar", toolJar,
+            "-jar", toolJarPath,
             "tech.geekcity.blackhole.application.tool.RemoteFileTransfer",
             "--username", "root",
             "--remoteHost", "localhost",
             "--remotePort", sshdPort,
             "--keyPairFile", keyPairFilePath,
             "--transferType", "upload",
-            "--localFile", toolJar,
-            "--remoteFile", "/tmp/${toolJar.getName()}",
+            "--localFile", toolJarPath,
+            "--remoteFile", "/tmp/${project.file(toolJarPath).getName()}",
     )
     doFirst {
         println(String.format("running command: %s", String.join(" ", getCommandLine())))
     }
-    dependsOn(assemble)
+    dependsOn(jar)
 }
