@@ -1,0 +1,38 @@
+buildscript {
+    repositories {
+        for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+            maven { url(mavenRepositoryUrl) }
+        }
+    }
+}
+plugins {
+    id 'org.inferred.processors' version '3.3.0'
+    id "java"
+}
+
+group = project.rootProject.ext.constructGroupName("lib", project.getName())
+version = project.rootProject.constructVersion()
+sourceCompatibility = project.rootProject.ext.javaVersion
+targetCompatibility = project.rootProject.ext.javaVersion
+
+repositories {
+    for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+        maven { url(mavenRepositoryUrl) }
+    }
+}
+
+def jacksonVersion = "2.9.8"
+dependencies {
+    implementation(project.rootProject.project("lib:core"))
+    processor 'org.inferred:freebuilder:2.6.1'
+    implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
+    implementation("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}")
+    implementation("com.google.guava:guava:29.0-jre")
+    implementation("org.freemarker:freemarker:2.3.9")
+    testImplementation("junit:junit:4.12")
+}
+
+test {
+    useJUnit()
+}

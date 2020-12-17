@@ -1,0 +1,52 @@
+buildscript {
+    repositories {
+        for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+            maven { url(mavenRepositoryUrl) }
+        }
+    }
+}
+plugins {
+    id "org.inferred.processors" version "3.3.0"
+    id "org.springframework.boot" version "2.2.2.RELEASE"
+    id "io.spring.dependency-management" version "1.0.8.RELEASE"
+    id "java"
+}
+
+group = project.rootProject.ext.constructGroupName("application", project.getName())
+version = project.rootProject.constructVersion()
+sourceCompatibility = project.rootProject.ext.javaVersion
+targetCompatibility = project.rootProject.ext.javaVersion
+
+repositories.clear()
+repositories.addAll(buildscript.repositories)
+
+dependencies {
+    processor("org.inferred:freebuilder:2.6.1")
+    implementation(project.rootProject.project("lib:core"))
+    implementation(project.rootProject.project("lib:render"))
+    implementation("com.google.guava:guava:29.0-jre")
+    implementation("org.apache.commons:commons-lang3:3.0")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.freemarker:freemarker:2.3.9")
+    testImplementation("junit:junit:4.12")
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        exclude group: "org.junit.vintage", module: "junit-vintage-engine"
+    }
+}
+
+test {
+    useJUnit()
+}
+
+task runJar(type: Exec) {
+    executable("java")
+    args(
+            String.format("-Dspring.config.location=%s", project.file("application.yaml")),
+            "-jar", project.file(String.format("build/libs/%s-%s.jar", project.getName(), project.getVersion())),
+            project.file("template"),
+    )
+    doFirst {
+        println(String.format("running command: %s", String.join(" ", getCommandLine())))
+    }
+    dependsOn(bootJar)
+}
