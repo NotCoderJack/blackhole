@@ -85,6 +85,7 @@ task renderSshdYaml(type: Exec) {
 task applyK8s(type: Exec) {
     commandLine(
             "kubectl",
+            "-n", project.rootProject.ext.k8sNameSpace,
             "apply",
             "-f", k8sYamlPath,
     )
@@ -104,6 +105,7 @@ task applyK8s(type: Exec) {
 task deleteK8s(type: Exec) {
     commandLine(
             "kubectl",
+            "-n", project.rootProject.ext.k8sNameSpace,
             "delete",
             "-f", k8sYamlPath,
     )

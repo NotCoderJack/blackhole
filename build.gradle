@@ -65,7 +65,8 @@ ext {
     keyPairFilePath = "${sshdKeyPath}/id_rsa.key.pair" as GStringImpl
     idRsaFile = "${sshdKeyPath}/id_rsa" as GStringImpl
     idRsaPubFile = "${sshdKeyPath}/id_rsa.pub" as GStringImpl
-    toolJarBaseName = toolJarBaseNameLocal
+    toolJarBaseName = toolJarBaseNameLocal as GStringImpl
     toolJarPath = "${project(":application:tool").buildDir.getAbsolutePath()}/libs/" +
-            "${toolJarBaseNameLocal}-${project.rootProject.constructVersion()}.jar"
+            "${toolJarBaseNameLocal}-${project.rootProject.constructVersion()}.jar" as GStringImpl
+    k8sNameSpace = "default"
 }
