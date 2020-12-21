@@ -42,26 +42,51 @@ ext {
     constructDockerImageName = { coreName ->
         return "${ext.dockerImageNamePrefix}_${coreName}:${ext.constructVersion()}"
     }
-    jarDependency = { group, artifact ->
+    jarDependencyVersion = { groupWithArtifact ->
         def slf4jVersion = "1.7.15"
+        def jacksonVersion = "2.9.8"
+        def grpcVersion = "1.30.1"
         versionMapping = [
-                "org.inferred:freebuilder"        : "2.6.1",
-                "com.google.code.findbugs:jsr305" : "3.0.2",
-                "com.google.guava:guava"          : "29.0-jre",
-                "org.apache.commons:commons-lang3": "3.0",
-                "org.slf4j:slf4j-api"             : slf4jVersion,
-                "org.freemarker:freemarker"       : "2.3.9",
-                "info.picocli:picocli"            : "4.5.0",
-                "commons-io:commons-io"           : "2.4",
-                "org.slf4j:slf4j-simple"          : slf4jVersion,
-                "junit:junit"                     : "4.12",
+                "org.inferred.processors"                       : "3.3.0",
+                "org.springframework.boot"                      : "2.2.2.RELEASE",
+                "io.spring.dependency-management"               : "1.0.8.RELEASE",
+                "com.google.protobuf"                           : "0.8.12",
+
+                "org.inferred:freebuilder"                      : "2.6.1",
+                "com.google.code.findbugs:jsr305"               : "3.0.2",
+                "com.google.guava:guava"                        : "29.0-jre",
+                "org.apache.commons:commons-lang3"              : "3.0",
+                "org.slf4j:slf4j-api"                           : slf4jVersion,
+                "org.slf4j:slf4j-simple"                        : slf4jVersion,
+                "org.freemarker:freemarker"                     : "2.3.9",
+                "info.picocli:picocli"                          : "4.5.0",
+                "commons-io:commons-io"                         : "2.4",
+                "org.apache.commons:commons-exec"               : "1.3",
+                "mysql:mysql-connector-java"                    : "8.0.21",
+                "com.h2database:h2"                             : "1.4.195",
+                "com.fasterxml.jackson.core:jackson-core"       : jacksonVersion,
+                "com.fasterxml.jackson.core:jackson-databind"   : jacksonVersion,
+                "com.fasterxml.jackson.core:jackson-annotations": jacksonVersion,
+                "io.grpc:grpc-api"                              : grpcVersion,
+                "io.grpc:grpc-core"                             : grpcVersion,
+                "io.grpc:grpc-netty-shaded"                     : grpcVersion,
+                "io.grpc:grpc-protobuf"                         : grpcVersion,
+                "io.grpc:grpc-stub"                             : grpcVersion,
+                "io.grpc:grpc-testing"                          : grpcVersion,
+                "io.grpc:protoc-gen-grpc-java"                  : grpcVersion,
+                "com.google.protobuf:protoc"                    : "3.12.0",
+                "junit:junit"                                   : "4.12",
+                "org.apache.tomcat:annotations-api"             : "6.0.53",
         ]
-        String key = "${group}:${artifact}"
-        def version = versionMapping[key]
+        def version = versionMapping[groupWithArtifact]
         if (!version) {
-            throw new RuntimeException("version not found for \"${key}\"")
+            throw new RuntimeException("version not found for \"${groupWithArtifact}\"")
         }
-        return "${key}:${version}"
+        return version
+    }
+    jarDependency = { group, artifact ->
+        String groupWithArtifact = "${group}:${artifact}"
+        return "${groupWithArtifact}:${ext.jarDependencyVersion(groupWithArtifact)}"
     }
     keyPairFilePath = "${sshdKeyPath}/id_rsa.key.pair" as GStringImpl
     idRsaFile = "${sshdKeyPath}/id_rsa" as GStringImpl
@@ -70,5 +95,5 @@ ext {
     toolJarPath = "${project(":application:tool").buildDir.getAbsolutePath()}/libs/" +
             "${toolJarBaseNameLocal}-${project.rootProject.constructVersion()}.jar" as GStringImpl
     k8sNameSpace = "default"
-    nfsProvisionerName = "${ext.coreName}-nfs-provisioner"
+    nfsProvisionerName = "${ext.coreName}-nfs-provisioner" as GStringImpl
 }

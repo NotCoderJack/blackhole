@@ -6,9 +6,9 @@ buildscript {
     }
 }
 plugins {
-    id "org.inferred.processors" version "3.3.0"
-    id "org.springframework.boot" version "2.2.2.RELEASE"
-    id "io.spring.dependency-management" version "1.0.8.RELEASE"
+    id project.rootProject.ext.jarDependencyVersion("org.inferred.processors", "")
+    id "org.springframework.boot" version project.rootProject.ext.jarDependencyVersion("org.springframework.boot", "")
+    id "io.spring.dependency-management" version project.rootProject.ext.jarDependencyVersion("io.spring.dependency-management", "")
     id "java"
 }
 
@@ -23,20 +23,20 @@ repositories {
     }
 }
 
-def jacksonVersion = "2.9.8"
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("mysql:mysql-connector-java:8.0.21")
-    processor("org.inferred:freebuilder:2.6.1")
-    implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
-    implementation("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}")
-    implementation("com.google.guava:guava:29.0-jre")
-    implementation("org.apache.commons:commons-lang3:3.0")
 
-    testImplementation("junit:junit:4.12")
-    testImplementation("com.h2database:h2:1.4.195")
+    processor(project.rootProject.ext.jarDependency("org.inferred", "freebuilder"))
+    implementation(project.rootProject.ext.jarDependency("mysql", "mysql-connector-java"))
+    implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-databind"))
+    implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-core"))
+    implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-annotations"))
+    implementation(project.rootProject.ext.jarDependency("com.google.guava", "guava"))
+    implementation(project.rootProject.ext.jarDependency("org.apache.commons", "commons-lang3"))
+
+    testImplementation(project.rootProject.ext.jarDependency("junit", "junit"))
+    testImplementation(project.rootProject.ext.jarDependency("com.h2database", "h2"))
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude group: "org.junit.vintage", module: "junit-vintage-engine"
     }

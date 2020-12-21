@@ -6,9 +6,9 @@ buildscript {
     }
 }
 plugins {
-    id "org.inferred.processors" version "3.3.0"
-    id "org.springframework.boot" version "2.2.2.RELEASE"
-    id "io.spring.dependency-management" version "1.0.8.RELEASE"
+    id project.rootProject.ext.jarDependencyVersion("org.inferred.processors", "")
+    id "org.springframework.boot" version project.rootProject.ext.jarDependencyVersion("org.springframework.boot", "")
+    id "io.spring.dependency-management" version project.rootProject.ext.jarDependencyVersion("io.spring.dependency-management", "")
     id "java"
 }
 
@@ -21,14 +21,14 @@ repositories.clear()
 repositories.addAll(buildscript.repositories)
 
 dependencies {
-    processor("org.inferred:freebuilder:2.6.1")
-    implementation(project.rootProject.project("lib:core"))
-    implementation(project.rootProject.project("lib:render"))
-    implementation("com.google.guava:guava:29.0-jre")
-    implementation("org.apache.commons:commons-lang3:3.0")
+    implementation(project(":lib:core"))
+    implementation(project(":lib:render"))
+    processor(project.rootProject.ext.jarDependency("org.inferred", "freebuilder"))
+    implementation(project.rootProject.ext.jarDependency("com.google.guava", "guava"))
+    implementation(project.rootProject.ext.jarDependency("org.apache.commons", "commons-lang3"))
+    implementation(project.rootProject.ext.jarDependency("org.freemarker", "freemarker"))
+    implementation(project.rootProject.ext.jarDependency("junit", "junit"))
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.freemarker:freemarker:2.3.9")
-    testImplementation("junit:junit:4.12")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude group: "org.junit.vintage", module: "junit-vintage-engine"
     }
