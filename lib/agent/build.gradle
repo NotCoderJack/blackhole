@@ -6,8 +6,8 @@ buildscript {
     }
 }
 plugins {
-    id "org.inferred.processors" version "3.3.0"
     id "java"
+    id "org.inferred.processors" version "3.3.0"
     id "com.google.protobuf" version "0.8.12"
     id "idea"
 }
@@ -32,43 +32,40 @@ sourceSets {
     }
 }
 
-def grpcVersion = "1.30.1"
-def slf4jVersion = "1.7.15"
-def jacksonVersion = "2.9.8"
 dependencies {
-    implementation(project.rootProject.project("lib:core"))
-    processor "org.inferred:freebuilder:2.6.1"
-    implementation("com.google.guava:guava:29.0-jre")
-    implementation("org.apache.commons:commons-lang3:3.0")
-    implementation("org.slf4j:slf4j-api:${slf4jVersion}")
-    implementation("org.freemarker:freemarker:2.3.9")
-    implementation("org.apache.commons:commons-exec:1.3")
-    implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
-    implementation("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}")
+    implementation(project(":lib:core"))
+    processor(project.rootProject.ext.jarDependency("org.inferred", "freebuilder"))
+    implementation(project.rootProject.ext.jarDependency("com.google.guava", "guava"))
+    implementation(project.rootProject.ext.jarDependency("org.apache.commons", "commons-lang3"))
+    implementation(project.rootProject.ext.jarDependency("org.slf4j", "slf4j-api"))
+    implementation(project.rootProject.ext.jarDependency("org.freemarker", "freemarker"))
+    implementation(project.rootProject.ext.jarDependency("org.apache.commons", "commons-exec"))
+    implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-databind"))
+    implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-core"))
+    implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-annotations"))
     // grpc packages: avoid sub-dependencies downloading from repo.maven.apache.org
-    implementation("io.grpc:grpc-api:${grpcVersion}")
-    implementation("io.grpc:grpc-core:${grpcVersion}")
-    implementation("io.grpc:grpc-netty-shaded:${grpcVersion}")
-    implementation("io.grpc:grpc-protobuf:${grpcVersion}")
-    implementation("io.grpc:grpc-stub:${grpcVersion}")
-    implementation("info.picocli:picocli:4.5.0")
+    implementation(project.rootProject.ext.jarDependency("io.grpc", "grpc-api"))
+    implementation(project.rootProject.ext.jarDependency("io.grpc", "grpc-core"))
+    implementation(project.rootProject.ext.jarDependency("io.grpc", "grpc-netty-shaded"))
+    implementation(project.rootProject.ext.jarDependency("io.grpc", "grpc-protobuf"))
+    implementation(project.rootProject.ext.jarDependency("io.grpc", "grpc-stub"))
+    implementation(project.rootProject.ext.jarDependency("info.picocli", "picocli"))
     // necessary for Java 9+
-    compileOnly("org.apache.tomcat:annotations-api:6.0.53")
-    testImplementation("junit:junit:4.12")
-    testImplementation("org.slf4j:slf4j-simple:${slf4jVersion}")
-    testImplementation "io.grpc:grpc-testing:${grpcVersion}"
+    implementation(project.rootProject.ext.jarDependency("org.apache.tomcat", "annotations-api"))
+    testImplementation(project.rootProject.ext.jarDependency("junit", "junit"))
+    testImplementation(project.rootProject.ext.jarDependency("org.slf4j", "slf4j-simple"))
+    testImplementation(project.rootProject.ext.jarDependency("io.grpc", "grpc-testing"))
 }
 test {
     useJUnit()
 }
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.12.0"
+        artifact = project.rootProject.ext.jarDependency("com.google.protobuf", "protoc")
     }
     plugins {
         grpc {
-            artifact = "io.grpc:protoc-gen-grpc-java:1.31.0"
+            artifact = project.rootProject.ext.jarDependency("io.grpc", "protoc-gen-grpc-java")
         }
     }
     generateProtoTasks {
