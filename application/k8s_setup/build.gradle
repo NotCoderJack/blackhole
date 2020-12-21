@@ -6,9 +6,9 @@ buildscript {
     }
 }
 plugins {
-    id project.rootProject.ext.jarDependencyVersion("org.inferred.processors", "")
-    id "org.springframework.boot" version project.rootProject.ext.jarDependencyVersion("org.springframework.boot", "")
-    id "io.spring.dependency-management" version project.rootProject.ext.jarDependencyVersion("io.spring.dependency-management", "")
+    id "org.inferred.processors" version "3.3.0"
+    id "org.springframework.boot" version "2.2.2.RELEASE"
+    id "io.spring.dependency-management" version "1.0.8.RELEASE"
     id "java"
 }
 

@@ -7,8 +7,8 @@ buildscript {
 }
 plugins {
     id "java"
-    id "org.inferred.processors" version project.rootProject.ext.jarDependencyVersion("org.inferred.processors", "")
-    id "com.google.protobuf" version project.rootProject.ext.jarDependencyVersion("com.google.protobuf", "")
+    id "org.inferred.processors" version "3.3.0"
+    id "com.google.protobuf" version "0.8.12"
     id "idea"
 }
 
@@ -32,8 +32,6 @@ sourceSets {
     }
 }
 
-def grpcVersion = "1.30.1"
-def slf4jVersion = "1.7.15"
 dependencies {
     implementation(project(":lib:core"))
     processor(project.rootProject.ext.jarDependency("org.inferred", "freebuilder"))
@@ -41,7 +39,7 @@ dependencies {
     implementation(project.rootProject.ext.jarDependency("org.apache.commons", "commons-lang3"))
     implementation(project.rootProject.ext.jarDependency("org.slf4j", "slf4j-api"))
     implementation(project.rootProject.ext.jarDependency("org.freemarker", "freemarker"))
-    implementation(project.rootProject.ext.jarDependency("org.apache.commons:commons-exec", "1.3"))
+    implementation(project.rootProject.ext.jarDependency("org.apache.commons", "commons-exec"))
     implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-databind"))
     implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-core"))
     implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-annotations"))
