@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nfs-storage-provisioner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nfs-storage-provisioner
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: nfs-storage-provisioner
+    spec:
+      containers:
+        - env:
+            - name: PROVISIONER_NAME
+              value: ${nfs_provisioner_name}
+            - name: NFS_SERVER
+              value: ${nfs_service_address}
+            - name: NFS_PATH
+              value: "${nfs_service_path}"
+          image: ${nfs_provisioner_image_name}
+          name: nfs-storage-provisioner
+          volumeMounts:
+            - mountPath: /persistentvolumes
+              name: nfs-client-root
+      serviceAccount: ${nfs_provisioner_service_account_name}
+      serviceAccountName: ${nfs_provisioner_service_account_name}
+      volumes:
+        - name: nfs-client-root
+          nfs:
+            server: ${nfs_service_address}
+            path: "${nfs_service_path}"

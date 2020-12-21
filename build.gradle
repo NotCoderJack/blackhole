@@ -3,6 +3,7 @@ import org.codehaus.groovy.runtime.GStringImpl
 def sshdKeyPath = "${project.buildDir.getAbsolutePath()}/keys"
 def toolJarBaseNameLocal = "${project(":application:tool").getName()}-with-dependencies"
 ext {
+    coreName = project.getName()
     mainVersion = "v1.0.0"
     mainGroup = "teck.geekcity.blackhole"
     javaVersion = 1.8
@@ -69,4 +70,5 @@ ext {
     toolJarPath = "${project(":application:tool").buildDir.getAbsolutePath()}/libs/" +
             "${toolJarBaseNameLocal}-${project.rootProject.constructVersion()}.jar" as GStringImpl
     k8sNameSpace = "default"
+    nfsProvisionerName = "${ext.coreName}-nfs-provisioner"
 }
