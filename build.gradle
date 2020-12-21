@@ -30,7 +30,7 @@ ext {
             commandLine("git", "rev-parse", "--short", "HEAD")
             standardOutput = commitIdOutputStream
         }
-        return "${commitIdOutputStream.toString().trim()}_${clean ? "" : "dirty"}"
+        return "${commitIdOutputStream.toString().trim()}${clean ? "" : "_dirty"}"
     }
     dockerImageNamePrefix = project.getName()
     constructGroupName = { middleName, projectName ->
