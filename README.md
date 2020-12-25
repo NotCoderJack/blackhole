@@ -13,7 +13,7 @@ bash setup_project.sh
 1. [sshd service](application/ssh): act as a springboard machine
 2. [nfs service](application/nfs): act as distributed storage
 3. [nfs storage provisioner](application/nfs_storage_provision): used to provide k8s volume automatically
-4. maria db
+4. [maria db](application/maria_db): mysql service
 5. postgres
 6. rabbit mq
 7. redis
