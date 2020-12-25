@@ -31,6 +31,7 @@
 ```
 ./gradlew -q :application:nfs_storage_provision:deleteCentos
 ./gradlew -q :application:nfs_storage_provision:deleteNfsStorageClassAndPvc
+./gradlew -q :application:nfs_storage_provision:deleteNfsStorageProvisioner
 ./gradlew -q :application:nfs_storage_provision:deleteRbac
 ./gradlew -q :application:nfs:deleteK8s
 ```

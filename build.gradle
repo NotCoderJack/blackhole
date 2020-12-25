@@ -91,4 +91,5 @@ ext {
             "${toolJarBaseNameLocal}-${project.rootProject.constructVersion()}.jar" as GStringImpl
     k8sNameSpace = "default"
     nfsProvisionerName = "${ext.coreName}-nfs-provisioner" as GStringImpl
+    pvcTemplateFile = project(":application:nfs_storage_provision").file("k8s/nfs_storage_class_and_pvc.yaml").getAbsolutePath()
 }

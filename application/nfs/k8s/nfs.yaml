@@ -21,7 +21,7 @@ spec:
             - name: NFS_DIR
               value: /nfs/share
             - name: NFS_OPTION
-              value: "fsid=0,rw,sync,insecure,all_squash,anonuid=65534,anongid=65534,no_subtree_check,nohide"
+              value: "fsid=0,rw,sync,insecure,no_root_squash,anonuid=65534,anongid=65534,no_subtree_check,nohide"
           volumeMounts:
             - name: nfs-share
               mountPath: /nfs/share

@@ -8,6 +8,7 @@ include "application:tool"
 include "application:ssh"
 include "application:nfs"
 include "application:nfs_storage_provision"
+include "application:maria_db"
 
 include "application:k8s_setup"
 include "application:secure_deploy:frontend"

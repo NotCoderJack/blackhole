@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maria-db
+  labels:
+    app: maria-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: maria-db
+  template:
+    metadata:
+      labels:
+        app: maria-db
+    spec:
+      restartPolicy: Always
+      volumes:
+        - name: maria-db-conf-storage
+          configMap:
+            name: ${config_map_name}
+        - name: data-storage
+          persistentVolumeClaim:
+            claimName: ${nfs_pvc_name}
+      containers:
+        - name: maria-db
+          image: ${maria_db_image_name}
+          volumeMounts:
+            - mountPath: /etc/mysql/my.cnf
+              name: maria-db-conf-storage
+              subPath: my.cnf
+            - mountPath: /var/lib/mysql
+              name: data-storage
+          args:
+            - '--character-set-server=utf8mb4'
+            - '--collation-server=utf8mb4_unicode_ci'
+          env:
+            - name: GPG_KEYS
+              value: 177F4010FE56CA3336300305F1656F24C74CD1D8
+            - name: MARIADB_MAJOR
+              value: '10.3'
+            - name: MYSQL_ROOT_HOST
+              value: '%'
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: password
+          ports:
+            - containerPort: 3306
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: maria-db-service
+spec:
+  ports:
+    - name: client
+      port: 3306
+      protocol: TCP
+      targetPort: 3306
+  selector:
+    app: maria-db
+  type: ClusterIP
