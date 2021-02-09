@@ -1,5 +1,6 @@
 package tech.geekcity.blackhole.environment;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -17,6 +18,8 @@ import java.util.Objects;
 
 public class DockerProxyTest {
     private DockerProxy dockerProxy;
+    public static final String IMAGE_NAME = "test_base_docker";
+    public static final String IMAGE_TAG = "v1.0";
 
     @BeforeEach
     void setUp() {
@@ -36,7 +39,7 @@ public class DockerProxyTest {
     }
 
     @Test
-    public void testBuildImage() throws IOException {
+    public void testBuildAndStart() throws IOException {
         String content = IOUtils.toString(
                 Objects.requireNonNull(
                         getClass().getClassLoader()
@@ -51,8 +54,27 @@ public class DockerProxyTest {
                 new File(String.format(
                         "%s/build_image.dockerfile",
                         dockerFile.toFile().getParentFile().getAbsolutePath())));
-        // TODO see implementation of buildImage: baseDirectory bug
-        dockerProxy.buildImage(dockerFile.toFile(), null, "test_base_docker", "v0.1");
+        String imageId = dockerProxy.buildImage(
+                dockerFile.toFile(),
+                // TODO see implementation of buildImage: baseDirectory bug
+                null,
+                IMAGE_NAME,
+                IMAGE_TAG);
 //        FileUtils.deleteDirectory(dockerDirectory.toFile());
+        String expectImageName = String.format("%s:%s", IMAGE_NAME, IMAGE_TAG);
+        Assertions.assertTrue(
+                dockerProxy.listImageId()
+                        .stream()
+                        // format: "sha256:${imageId}..."
+                        .anyMatch(id -> id.startsWith(imageId, 7)));
+        Assertions.assertTrue(
+                dockerProxy.listImage()
+                        .stream()
+                        .anyMatch(expectImageName::equals));
+        dockerProxy.startContainer(
+                expectImageName,
+                "test_container",
+                ImmutableList.of("/bin/bash", "-c", "sleep 1d"));
+//        dockerProxy.stopContainer(expectImageName);
     }
 }
