@@ -1,0 +1,36 @@
+buildscript {
+    repositories {
+        for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+            maven { url(mavenRepositoryUrl) }
+        }
+    }
+}
+plugins {
+    id "org.inferred.processors" version "3.3.0"
+    id "java"
+}
+
+group = project.rootProject.ext.constructGroupName("application", project.getName())
+version = project.rootProject.constructVersion()
+sourceCompatibility = project.rootProject.ext.javaVersion
+targetCompatibility = project.rootProject.ext.javaVersion
+
+repositories.clear()
+repositories.addAll(buildscript.repositories)
+
+// TODO manage version by root build.gradle
+def dockerJavaVersion = "3.2.7"
+def junitJupiterVersion = "5.3.1"
+dependencies {
+    processor(project.rootProject.ext.jarDependency("org.inferred", "freebuilder"))
+    implementation(project.rootProject.ext.jarDependency("com.google.guava", "guava"))
+    implementation(project.rootProject.ext.jarDependency("org.apache.commons", "commons-lang3"))
+    implementation("com.github.docker-java:docker-java-core:${dockerJavaVersion}")
+    implementation("com.github.docker-java:docker-java-transport-httpclient5:${dockerJavaVersion}")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+}
+
+test {
+    useJUnitPlatform()
+}
