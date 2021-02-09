@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.BuildImageCmd;
 import com.github.dockerjava.api.command.BuildImageResultCallback;
+import com.github.dockerjava.api.command.ListImagesCmd;
 import com.github.dockerjava.api.command.VersionCmd;
+import com.github.dockerjava.api.model.HostConfig;
+import com.github.dockerjava.api.model.Image;
 import com.github.dockerjava.api.model.Version;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
@@ -14,6 +17,7 @@ import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import org.inferred.freebuilder.FreeBuilder;
 
 import javax.annotation.Nonnull;
@@ -21,7 +25,10 @@ import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @FreeBuilder
 @JsonDeserialize(builder = DockerProxy.Builder.class)
@@ -82,7 +89,7 @@ public abstract class DockerProxy implements Closeable {
         return version.getApiVersion();
     }
 
-    public void buildImage(
+    public String buildImage(
             @Nonnull File dockerFile,
             @Nullable File baseDirectory,
             @Nonnull String imageName,
@@ -99,16 +106,39 @@ public abstract class DockerProxy implements Closeable {
                 .withTags(Collections.singleton(String.format("%s:%s", imageName, tag)))
                 .withBaseDirectory(null != baseDirectory ? baseDirectory : dockerFile.getParentFile())
                 .withDockerfile(dockerFile);
-        String imageId = buildImageCmd.exec(new BuildImageResultCallback()).awaitImageId();
-        System.out.println(imageId);
+        return buildImageCmd.exec(new BuildImageResultCallback()).awaitImageId();
     }
 
-    public void startContainer(String imageNameWithTag, String containerName) {
+    public List<String> listImageId() {
+        ListImagesCmd listImagesCmd = dockerClient.listImagesCmd();
+        List<Image> imageList = listImagesCmd.exec();
+        return imageList.stream()
+                .map(Image::getId)
+                .collect(Collectors.toList());
+    }
 
+    public List<String> listImage() {
+        ListImagesCmd listImagesCmd = dockerClient.listImagesCmd();
+        List<Image> imageList = listImagesCmd.exec();
+        return imageList.stream()
+                .flatMap(image -> Arrays.stream(image.getRepoTags()))
+                .collect(Collectors.toList());
+    }
+
+    public void startContainer(String imageNameWithTag, String containerName, List<String> cmd) {
+        dockerClient.startContainerCmd(
+                dockerClient.createContainerCmd(imageNameWithTag)
+                        .withName(containerName)
+                        .withHostConfig(HostConfig.newHostConfig()
+                                .withPrivileged(true)
+                                .withAutoRemove(true))
+                        .withCmd(cmd)
+                        .exec()
+                        .getId()
+        ).exec();
     }
 
     public void stopContainer(String containerName) {
-
     }
 
     public String exec(String containerName, String command) {
