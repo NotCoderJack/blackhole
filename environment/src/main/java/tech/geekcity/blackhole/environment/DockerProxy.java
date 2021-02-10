@@ -4,10 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.BuildImageCmd;
 import com.github.dockerjava.api.command.BuildImageResultCallback;
 import com.github.dockerjava.api.command.ListImagesCmd;
 import com.github.dockerjava.api.command.VersionCmd;
+import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Image;
 import com.github.dockerjava.api.model.Version;
@@ -17,7 +19,7 @@ import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
+import org.apache.commons.lang3.tuple.Pair;
 import org.inferred.freebuilder.FreeBuilder;
 
 import javax.annotation.Nonnull;
@@ -25,9 +27,11 @@ import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @FreeBuilder
@@ -138,10 +142,59 @@ public abstract class DockerProxy implements Closeable {
         ).exec();
     }
 
-    public void stopContainer(String containerName) {
+    public Map<String, String> listContainer() {
+        return dockerClient.listContainersCmd().exec().stream()
+                .flatMap(container -> Arrays.stream(container.getNames())
+                        .map(containerName -> Pair.of(container.getId(), containerName)))
+                .collect(Collectors.toMap(
+                        Pair::getRight,
+                        Pair::getLeft,
+                        (oldValue, newValue) -> newValue
+                ));
     }
 
-    public String exec(String containerName, String command) {
-        return "response";
+    public void stopContainer(String containerNameOrId) {
+        dockerClient.stopContainerCmd(containerNameOrId).exec();
+    }
+
+    public void exec(
+            String containerNameOrId,
+            OutputStream stdout, OutputStream stderr,
+            String... command) throws InterruptedException {
+        dockerClient.execStartCmd(
+                dockerClient.execCreateCmd(containerNameOrId)
+                        .withAttachStdout(true)
+                        .withAttachStderr(true)
+                        .withCmd(command)
+                        .exec()
+                        .getId()
+        ).exec(new ResultCallback.Adapter<Frame>() {
+            @Override
+            public void onNext(Frame frame) {
+                if (frame != null) {
+                    try {
+                        switch (frame.getStreamType()) {
+                            case STDOUT:
+                            case RAW:
+                                if (stdout != null) {
+                                    stdout.write(frame.getPayload());
+                                    stdout.flush();
+                                }
+                                break;
+                            case STDERR:
+                                if (stderr != null) {
+                                    stderr.write(frame.getPayload());
+                                    stderr.flush();
+                                }
+                                break;
+                            default:
+                                throw new RuntimeException(String.format("unknown type: %s", frame.getStreamType()));
+                        }
+                    } catch (IOException e) {
+                        onError(e);
+                    }
+                }
+            }
+        }).awaitCompletion();
     }
 }

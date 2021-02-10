@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -39,7 +40,7 @@ public class DockerProxyTest {
     }
 
     @Test
-    public void testBuildAndStart() throws IOException {
+    public void testBuildAndStart() throws IOException, InterruptedException {
         String content = IOUtils.toString(
                 Objects.requireNonNull(
                         getClass().getClassLoader()
@@ -71,10 +72,21 @@ public class DockerProxyTest {
                 dockerProxy.listImage()
                         .stream()
                         .anyMatch(expectImageName::equals));
+        String containerName = "test_container";
         dockerProxy.startContainer(
                 expectImageName,
-                "test_container",
+                containerName,
                 ImmutableList.of("/bin/bash", "-c", "sleep 1d"));
-//        dockerProxy.stopContainer(expectImageName);
+        Assertions.assertTrue(dockerProxy.listContainer()
+                .containsKey(String.format("/%s", containerName)));
+        ByteArrayOutputStream stdout = new ByteArrayOutputStream();
+        ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+        dockerProxy.exec(
+                containerName,
+                stdout, stderr,
+                "cat", "/tmp/build_image.dockerfile");
+        Assertions.assertEquals(content, stdout.toString());
+        Assertions.assertEquals("", stderr.toString());
+        dockerProxy.stopContainer(containerName);
     }
 }
