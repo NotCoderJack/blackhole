@@ -52,12 +52,13 @@ dependencies {
     implementation(project.rootProject.ext.jarDependency("info.picocli", "picocli"))
     // necessary for Java 9+
     implementation(project.rootProject.ext.jarDependency("org.apache.tomcat", "annotations-api"))
-    testImplementation(project.rootProject.ext.jarDependency("junit", "junit"))
+    testImplementation(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-api"))
+    testRuntimeOnly(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-engine"))
     testImplementation(project.rootProject.ext.jarDependency("org.slf4j", "slf4j-simple"))
     testImplementation(project.rootProject.ext.jarDependency("io.grpc", "grpc-testing"))
 }
 test {
-    useJUnit()
+    useJUnitPlatform()
 }
 protobuf {
     protoc {

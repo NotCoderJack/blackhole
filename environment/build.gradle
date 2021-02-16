@@ -18,18 +18,15 @@ targetCompatibility = project.rootProject.ext.javaVersion
 repositories.clear()
 repositories.addAll(buildscript.repositories)
 
-// TODO manage version by root build.gradle
-def dockerJavaVersion = "3.2.7"
-def junitJupiterVersion = "5.3.1"
 dependencies {
     processor(project.rootProject.ext.jarDependency("org.inferred", "freebuilder"))
     implementation(project.rootProject.ext.jarDependency("com.google.guava", "guava"))
     implementation(project.rootProject.ext.jarDependency("org.apache.commons", "commons-lang3"))
-    implementation("com.github.docker-java:docker-java-core:${dockerJavaVersion}")
-    implementation("com.github.docker-java:docker-java-transport-httpclient5:${dockerJavaVersion}")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
+    implementation(project.rootProject.ext.jarDependency("com.github.docker-java", "docker-java-core"))
+    implementation(project.rootProject.ext.jarDependency("com.github.docker-java", "docker-java-transport-httpclient5"))
     testImplementation(project.rootProject.ext.jarDependency("org.slf4j", "slf4j-simple"))
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+    testImplementation(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-api"))
+    testRuntimeOnly(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-engine"))
 }
 
 test {

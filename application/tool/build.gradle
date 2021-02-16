@@ -35,11 +35,12 @@ dependencies {
     implementation(project.rootProject.ext.jarDependency("commons-io", "commons-io"))
     // TODO use logback
     implementation(project.rootProject.ext.jarDependency("org.slf4j", "slf4j-simple"))
-    implementation(project.rootProject.ext.jarDependency("junit", "junit"))
+    testImplementation(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-api"))
+    testRuntimeOnly(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-engine"))
     testImplementation(project.rootProject.ext.jarDependency("org.slf4j", "slf4j-simple"))
 }
 test {
-    useJUnit()
+    useJUnitPlatform()
 }
 def jarBaseName = project.rootProject.ext.toolJarBaseName
 jar {
