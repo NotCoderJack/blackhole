@@ -65,7 +65,7 @@ public abstract class SslFileGenerator implements Runner {
     public abstract String targetDirectoryPath();
 
     @Override
-    public void open() {
+    public void configure() {
         String targetDirectoryPath = targetDirectoryPath();
         File targetDirectory = new File(targetDirectoryPath);
         if (!targetDirectory.exists()) {

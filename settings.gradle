@@ -1,8 +1,6 @@
 rootProject.name = "blackhole"
-// prepare env for tests or local integration
-include "environment"
-
 include "lib:core"
+include "lib:docker"
 include "lib:ssh"
 include "lib:agent"
 include "lib:render"

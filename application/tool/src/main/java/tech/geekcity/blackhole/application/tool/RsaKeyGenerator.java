@@ -39,7 +39,7 @@ public class RsaKeyGenerator implements Callable<Integer> {
         try (RsaKeyPairGenerator rsaKeyPairGenerator = RsaKeyPairGenerator.Builder.newInstance()
                 .keySize(keySize)
                 .build()) {
-            rsaKeyPairGenerator.open();
+            rsaKeyPairGenerator.configure();
             // TODO check exists
             if (idRsaFile.exists() && idRsaPubFile.exists() && existsDoNothing) {
                 LOGGER.info(

@@ -14,7 +14,7 @@ public class CommandService extends CommandAgentGrpc.CommandAgentImplBase {
                 .commandBox(commandBox)
                 .build();
         try {
-            commandBoxRunner.open();
+            commandBoxRunner.configure();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

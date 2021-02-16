@@ -74,7 +74,7 @@ public abstract class CommandClientSsl implements CommandClient {
     public abstract String trustCertCollectionFilePath();
 
     @Override
-    public void open() throws SSLException {
+    public void configure() throws SSLException {
         String host = host();
         int port = port();
         SslContext sslContext = sslContextForClient();

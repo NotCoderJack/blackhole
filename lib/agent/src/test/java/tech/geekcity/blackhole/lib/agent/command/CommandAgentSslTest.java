@@ -26,7 +26,7 @@ public class CommandAgentSslTest {
                 .scriptPath("./bin/generate_ssl_files.sh")
                 .targetDirectoryPath(targetDirectory)
                 .build()) {
-            sslFileGenerator.open();
+            sslFileGenerator.configure();
             sslFileGenerator.run();
         }
         int port = new Double(Math.random() * 10000).intValue() + 10000;
@@ -36,7 +36,7 @@ public class CommandAgentSslTest {
                 .trustCertCollectionFilePath(String.format("%s/ca.crt", targetDirectory))
                 .port(port)
                 .build();
-        commandAgent.open();
+        commandAgent.configure();
         commandAgent.run();
         commandClient = CommandClientSsl.Builder.newInstance()
                 .keyCertChainFilePath(String.format("%s/client.crt", targetDirectory))
@@ -45,7 +45,7 @@ public class CommandAgentSslTest {
                 .host("localhost")
                 .port(port)
                 .build();
-        commandClient.open();
+        commandClient.configure();
     }
 
     @After

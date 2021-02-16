@@ -61,7 +61,7 @@ public abstract class SshClientWrap implements Configurable {
     public abstract KeyPair keyPair();
 
     @Override
-    public void open() throws IOException {
+    public void configure() throws IOException {
         sshClient = SshClient.setUpDefaultClient();
         sshClient.setServerKeyVerifier(new DefaultKnownHostsServerKeyVerifier(AcceptAllServerKeyVerifier.INSTANCE));
         sshClient.start();

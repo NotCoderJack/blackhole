@@ -60,7 +60,7 @@ public abstract class CommandClientDefault implements CommandClient {
     public abstract int port();
 
     @Override
-    public void open() {
+    public void configure() {
         String host = host();
         int port = port();
         channel = ManagedChannelBuilder.forTarget(String.format("%s:%s", host, port))

@@ -56,7 +56,7 @@ public class RemoteFileTransfer implements Callable<Integer> {
                         .keyPair(keyPair)
                         .build())
                 .build()) {
-            simpleScp.open();
+            simpleScp.configure();
             switch (TransferType.valueOf(transferType.toUpperCase())) {
                 case UPLOAD:
                     Preconditions.checkArgument(

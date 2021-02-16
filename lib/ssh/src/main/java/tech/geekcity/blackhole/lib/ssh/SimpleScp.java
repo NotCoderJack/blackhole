@@ -54,8 +54,8 @@ public abstract class SimpleScp implements Configurable {
     public abstract SshClientWrap sshClientWrap();
 
     @Override
-    public void open() throws IOException {
-        sshClientWrap().open();
+    public void configure() throws IOException {
+        sshClientWrap().configure();
     }
 
     @Override
