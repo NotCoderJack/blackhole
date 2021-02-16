@@ -1,11 +1,13 @@
-package tech.geekcity.blackhole.environment;
+package tech.geekcity.blackhole.lib.docker.image;
 
 import com.github.dockerjava.api.model.Image;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import tech.geekcity.blackhole.environment.util.DockerUtil;
+import tech.geekcity.blackhole.lib.docker.DockerProxy;
+import tech.geekcity.blackhole.lib.docker.image.CentOsBase;
+import tech.geekcity.blackhole.lib.docker.util.DockerUtil;
 
 import java.io.IOException;
 

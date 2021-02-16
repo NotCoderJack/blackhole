@@ -1,4 +1,4 @@
-package tech.geekcity.blackhole.environment;
+package tech.geekcity.blackhole.lib.docker;
 
 import com.github.dockerjava.api.model.Image;
 import com.google.common.collect.ImmutableList;
@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
-import tech.geekcity.blackhole.environment.util.DockerUtil;
+import tech.geekcity.blackhole.lib.docker.util.DockerUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

@@ -1,5 +1,5 @@
 FROM ${CENT_OS_BASE_IMAGE}
-CMD set -x \
+RUN set -x \
     && yum -y install openssh-server openssh-clients \
     && systemctl enable sshd \
     && mkdir -p /root/.ssh \

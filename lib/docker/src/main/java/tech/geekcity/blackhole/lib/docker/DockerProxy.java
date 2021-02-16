@@ -1,4 +1,4 @@
-package tech.geekcity.blackhole.environment;
+package tech.geekcity.blackhole.lib.docker;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,7 +25,6 @@ import tech.geekcity.blackhole.lib.core.Configurable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;

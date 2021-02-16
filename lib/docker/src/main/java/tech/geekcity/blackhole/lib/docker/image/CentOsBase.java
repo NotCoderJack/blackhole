@@ -1,4 +1,4 @@
-package tech.geekcity.blackhole.environment;
+package tech.geekcity.blackhole.lib.docker.image;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,10 +6,10 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.inferred.freebuilder.FreeBuilder;
-import tech.geekcity.blackhole.environment.util.DockerUtil;
+import tech.geekcity.blackhole.lib.docker.DockerProxy;
+import tech.geekcity.blackhole.lib.docker.util.DockerUtil;
 import tech.geekcity.blackhole.lib.core.Configurable;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -64,8 +64,8 @@ public abstract class CentOsBase implements Configurable {
         dockerProxy = DockerProxy.Builder.newInstance()
                 .build();
         dockerProxy.configure();
-        buildDirectory = Files.createTempDirectory("docker.build.").toFile();
-        dockerFile = File.createTempFile("centos.base.", "dockerfile", buildDirectory);
+        buildDirectory = Files.createTempDirectory("centos.base.build.").toFile();
+        dockerFile = File.createTempFile("centos.base.", ".dockerfile", buildDirectory);
         String dockerFileContent = IOUtils.toString(
                 Objects.requireNonNull(getClass()
                         .getClassLoader()
