@@ -1,5 +1,6 @@
 package tech.geekcity.blackhole.environment;
 
+import com.github.dockerjava.api.model.Image;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
+import tech.geekcity.blackhole.environment.util.DockerUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -18,7 +20,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 public class DockerProxyTest {
-    private DockerProxy dockerProxy;
+    private transient DockerProxy dockerProxy;
     public static final String IMAGE_NAME = "test_base_docker";
     public static final String IMAGE_TAG = "v1.0";
 
@@ -26,7 +28,7 @@ public class DockerProxyTest {
     void setUp() {
         dockerProxy = DockerProxy.Builder.newInstance()
                 .build();
-        dockerProxy.open();
+        dockerProxy.configure();
     }
 
     @AfterEach
@@ -61,20 +63,15 @@ public class DockerProxyTest {
                 null,
                 IMAGE_NAME,
                 IMAGE_TAG);
+        Image image = dockerProxy.findImageByName(IMAGE_NAME, IMAGE_TAG);
+        Assertions.assertNotNull(image);
+        Assertions.assertTrue(
+                image.getId()
+                        .startsWith(DockerUtil.wrapIdWithSha256(imageId)));
 //        FileUtils.deleteDirectory(dockerDirectory.toFile());
-        String expectImageName = String.format("%s:%s", IMAGE_NAME, IMAGE_TAG);
-        Assertions.assertTrue(
-                dockerProxy.listImageId()
-                        .stream()
-                        // format: "sha256:${imageId}..."
-                        .anyMatch(id -> id.startsWith(imageId, 7)));
-        Assertions.assertTrue(
-                dockerProxy.listImage()
-                        .stream()
-                        .anyMatch(expectImageName::equals));
         String containerName = "test_container";
         dockerProxy.startContainer(
-                expectImageName,
+                String.format("%s:%s", IMAGE_NAME, IMAGE_TAG),
                 containerName,
                 ImmutableList.of("/bin/bash", "-c", "sleep 1d"));
         Assertions.assertTrue(dockerProxy.listContainer()
