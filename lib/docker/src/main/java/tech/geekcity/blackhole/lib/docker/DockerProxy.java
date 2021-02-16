@@ -5,14 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
-import com.github.dockerjava.api.command.BuildImageCmd;
-import com.github.dockerjava.api.command.BuildImageResultCallback;
-import com.github.dockerjava.api.command.ListImagesCmd;
-import com.github.dockerjava.api.command.VersionCmd;
-import com.github.dockerjava.api.model.Frame;
-import com.github.dockerjava.api.model.HostConfig;
-import com.github.dockerjava.api.model.Image;
-import com.github.dockerjava.api.model.Version;
+import com.github.dockerjava.api.command.*;
+import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
@@ -131,14 +125,46 @@ public abstract class DockerProxy implements Configurable {
     }
 
     public void startContainer(String imageNameWithTag, String containerName, List<String> cmd) {
+        startContainer(imageNameWithTag,
+                containerName,
+                cmd,
+                null,
+                null,
+                false,
+                true);
+    }
+
+    public void startContainer(
+            String imageNameWithTag,
+            String containerName,
+            @Nullable List<String> cmd,
+            @Nullable List<String> volumeBindList,
+            @Nullable List<String> portBindList,
+            boolean privileged,
+            boolean autoRemove) {
+        List<PortBinding> portBindingList = null == portBindList ? Collections.emptyList()
+                : portBindList.stream()
+                .map(PortBinding::parse)
+                .collect(Collectors.toList());
+        HostConfig hostConfig = HostConfig.newHostConfig()
+                .withPrivileged(privileged)
+                .withAutoRemove(autoRemove)
+                .withBinds(null == volumeBindList ? Collections.emptyList()
+                        : volumeBindList.stream()
+                        .map(Bind::parse)
+                        .collect(Collectors.toList()))
+                .withPortBindings(portBindingList);
+        CreateContainerCmd createContainerCmd = dockerClient.createContainerCmd(imageNameWithTag)
+                .withName(containerName)
+                .withHostConfig(hostConfig)
+                .withExposedPorts(portBindingList.stream()
+                        .map(PortBinding::getExposedPort)
+                        .collect(Collectors.toList()));
+        if (null != cmd) {
+            createContainerCmd.withCmd(cmd);
+        }
         dockerClient.startContainerCmd(
-                dockerClient.createContainerCmd(imageNameWithTag)
-                        .withName(containerName)
-                        .withHostConfig(HostConfig.newHostConfig()
-                                .withPrivileged(true)
-                                .withAutoRemove(true))
-                        .withCmd(cmd)
-                        .exec()
+                createContainerCmd.exec()
                         .getId()
         ).exec();
     }

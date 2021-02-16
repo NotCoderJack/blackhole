@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
@@ -121,6 +122,27 @@ public abstract class Ssh implements Configurable {
 
     public String buildImage() {
         return dockerProxy.buildImage(dockerFile, buildDirectory, IMAGE_NAME, tag());
+    }
+
+    public void startContainer(
+            String containerName,
+            File authorizedKeysFile,
+            int bindPort) {
+        // TODO check permission bits of authorizedKeysFile
+        dockerProxy.startContainer(
+                String.format("%s:%s", IMAGE_NAME, tag()),
+                containerName,
+                null,
+                Collections.singletonList(
+                        String.format("%s:/root/.ssh/authorized_keys", authorizedKeysFile.getAbsolutePath())),
+                Collections.singletonList(String.format("%s:22", bindPort)),
+                true,
+                true
+        );
+    }
+
+    public void stopContainer(String containerName){
+        dockerProxy.stopContainer(containerName);
     }
 
     private void renderSingleFile(Map<String, String> config, File templateFile, File outputFile)
