@@ -22,13 +22,13 @@ public class CommandAgentDefaultTest {
         commandAgent = CommandAgentDefault.Builder.newInstance()
                 .port(port)
                 .build();
-        commandAgent.open();
+        commandAgent.configure();
         commandAgent.run();
         commandClient = CommandClientDefault.Builder.newInstance()
                 .host("localhost")
                 .port(port)
                 .build();
-        commandClient.open();
+        commandClient.configure();
     }
 
     @After

@@ -31,7 +31,7 @@ public class CommandAgentRunner implements Callable<Integer> {
     @Override
     public Integer call() {
         try (CommandAgent commandAgent = commandAgent()) {
-            commandAgent.open();
+            commandAgent.configure();
             LOGGER.info("running commandAgent: {}", commandAgent.toJsonSilently());
             commandAgent.run();
             commandAgent.blockUntilShutdown();

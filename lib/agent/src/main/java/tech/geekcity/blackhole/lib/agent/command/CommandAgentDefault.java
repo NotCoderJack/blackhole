@@ -54,7 +54,7 @@ public abstract class CommandAgentDefault implements CommandAgent {
     public abstract int port();
 
     @Override
-    public void open() {
+    public void configure() {
         server = ServerBuilder.forPort(port())
                 .addService(new CommandService())
                 .build();

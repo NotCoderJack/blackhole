@@ -21,7 +21,7 @@ public class Application implements CommandLineRunner {
         try (RenderEngine renderEngine = RenderEngine.Builder.newInstance()
                 .templatePath(args.length == 0 ? "template" : args[0])
                 .build()) {
-            renderEngine.open();
+            renderEngine.configure();
             ByteArrayOutputStream byteArrayOutputStream = renderEngine.render(
                     ImmutableMap.<String, Object>builder()
                             .put("password", "123456")

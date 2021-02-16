@@ -7,6 +7,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.inferred.freebuilder.FreeBuilder;
 import tech.geekcity.blackhole.environment.util.DockerUtil;
+import tech.geekcity.blackhole.lib.core.Configurable;
 
 import java.io.Closeable;
 import java.io.File;
@@ -17,7 +18,7 @@ import java.util.Objects;
 
 @FreeBuilder
 @JsonDeserialize(builder = CentOsBase.Builder.class)
-public abstract class CentOsBase implements Closeable {
+public abstract class CentOsBase implements Configurable {
     public static final String IMAGE_NAME = DockerUtil.camelToSnake(CentOsBase.class.getSimpleName());
     private transient DockerProxy dockerProxy;
     private transient File buildDirectory;
@@ -58,6 +59,7 @@ public abstract class CentOsBase implements Closeable {
 
     public abstract String tag();
 
+    @Override
     public void configure() throws IOException {
         dockerProxy = DockerProxy.Builder.newInstance()
                 .build();

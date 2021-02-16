@@ -59,7 +59,7 @@ public abstract class RenderEngine implements Configurable {
     public abstract String templatePath();
 
     @Override
-    public void open() throws IOException {
+    public void configure() throws IOException {
         configuration = new Configuration();
         configuration.setDirectoryForTemplateLoading(new File(templatePath()));
         configuration.setDefaultEncoding("UTF-8");

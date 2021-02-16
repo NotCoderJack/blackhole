@@ -73,7 +73,7 @@ public abstract class CommandBoxRunner implements Runner {
     public abstract Runner callback();
 
     @Override
-    public void open() throws IOException {
+    public void configure() throws IOException {
         standardOutputStream = standardOutputStream();
         if (null == standardOutputStream) {
             standardOutputStream = new ByteArrayOutputStream();
@@ -91,7 +91,7 @@ public abstract class CommandBoxRunner implements Runner {
             return;
         }
         try (Runner runner = callback) {
-            runner.open();
+            runner.configure();
             runner.run();
         }
     }

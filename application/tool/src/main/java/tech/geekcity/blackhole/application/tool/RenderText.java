@@ -34,7 +34,7 @@ public class RenderText implements Callable<Integer> {
         try (RenderEngine renderEngine = RenderEngine.Builder.newInstance()
                 .templatePath(templateFile.getParentFile().getAbsolutePath())
                 .build()) {
-            renderEngine.open();
+            renderEngine.configure();
             ByteArrayOutputStream byteArrayOutputStream = renderEngine.render(
                     properties.entrySet().stream().collect(Collectors.toMap(
                             entry -> entry.getKey().toString(),

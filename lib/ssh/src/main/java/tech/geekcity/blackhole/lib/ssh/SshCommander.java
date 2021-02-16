@@ -63,8 +63,8 @@ public abstract class SshCommander implements Configurable {
     public abstract OutputStream errorOutput();
 
     @Override
-    public void open() throws IOException {
-        sshClientWrap().open();
+    public void configure() throws IOException {
+        sshClientWrap().configure();
     }
 
     @Override

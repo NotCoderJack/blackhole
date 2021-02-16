@@ -21,6 +21,7 @@ import com.github.dockerjava.transport.DockerHttpClient;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.tuple.Pair;
 import org.inferred.freebuilder.FreeBuilder;
+import tech.geekcity.blackhole.lib.core.Configurable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,7 +37,7 @@ import java.util.stream.Collectors;
 
 @FreeBuilder
 @JsonDeserialize(builder = DockerProxy.Builder.class)
-public abstract class DockerProxy implements Closeable {
+public abstract class DockerProxy implements Configurable {
     private transient DockerClient dockerClient;
 
     /**
@@ -72,6 +73,7 @@ public abstract class DockerProxy implements Closeable {
         }
     }
 
+    @Override
     public void configure() {
         DockerClientConfig dockerClientConfig = DefaultDockerClientConfig.createDefaultConfigBuilder()
                 .build();

@@ -72,7 +72,7 @@ public abstract class CommandAgentSsl implements CommandAgent {
     public abstract String trustCertCollectionFilePath();
 
     @Override
-    public void open() throws SSLException {
+    public void configure() throws SSLException {
         server = NettyServerBuilder.forAddress(new InetSocketAddress(port()))
                 .addService(new CommandService())
                 .sslContext(sslContextForServer())

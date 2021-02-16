@@ -55,7 +55,7 @@ public abstract class RsaKeyPairGenerator implements Configurable {
     }
 
     @Override
-    public void open() throws IOException {
+    public void configure() throws IOException {
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
             keyPairGenerator.initialize(keySize());
