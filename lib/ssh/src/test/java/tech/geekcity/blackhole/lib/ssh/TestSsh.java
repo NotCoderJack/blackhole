@@ -6,6 +6,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tech.geekcity.blackhole.lib.ssh.wrap.RsaKeyPairWrap;
+import tech.geekcity.blackhole.lib.ssh.wrap.SshClientWrap;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +26,9 @@ public class TestSsh {
     public void setUp() throws IOException, ClassNotFoundException {
         localTempDirectory = System.getProperty("java.io.tmpdir");
         byte[] keyPairDataBytes = FileUtils.readFileToByteArray(new File("../tool/dim/sshd/id_rsa.key.pair"));
-        keyPair = RsaKeyPairWrap.deserialize(keyPairDataBytes).keyPair();
+        keyPair = RsaKeyPairWrap.Builder.newInstance()
+                .parseFromKeyPairDataBytes(keyPairDataBytes)
+                .getKeyPair();
     }
 
     @AfterEach

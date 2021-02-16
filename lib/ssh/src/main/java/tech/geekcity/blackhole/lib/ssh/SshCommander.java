@@ -8,6 +8,7 @@ import org.apache.sshd.client.channel.ClientChannelEvent;
 import org.apache.sshd.client.session.ClientSession;
 import org.inferred.freebuilder.FreeBuilder;
 import tech.geekcity.blackhole.lib.core.Configurable;
+import tech.geekcity.blackhole.lib.ssh.wrap.SshClientWrap;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

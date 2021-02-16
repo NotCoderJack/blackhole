@@ -1,4 +1,4 @@
-package tech.geekcity.blackhole.lib.ssh;
+package tech.geekcity.blackhole.lib.ssh.wrap;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
