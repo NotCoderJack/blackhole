@@ -49,7 +49,7 @@ public class RemoteFileTransfer implements Callable<Integer> {
         byte[] keyPairDataBytes = FileUtils.readFileToByteArray(keyPairFile);
         KeyPair keyPair = RsaKeyPairWrap.Builder.newInstance()
                 .parseFromKeyPairDataBytes(keyPairDataBytes)
-                .getKeyPair();
+                .doGetKeyPair();
         try (SimpleScp simpleScp = SimpleScp.Builder.newInstance()
                 .sshClientWrap(SshClientWrap.Builder.newInstance()
                         .username(username)

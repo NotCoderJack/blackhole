@@ -28,7 +28,7 @@ public class TestSsh {
         byte[] keyPairDataBytes = FileUtils.readFileToByteArray(new File("../tool/dim/sshd/id_rsa.key.pair"));
         keyPair = RsaKeyPairWrap.Builder.newInstance()
                 .parseFromKeyPairDataBytes(keyPairDataBytes)
-                .getKeyPair();
+                .doGetKeyPair();
     }
 
     @AfterEach

@@ -129,7 +129,7 @@ public abstract class RsaKeyPairWrap {
     }
 
     @Deprecated
-    public KeyPair getKeyPair() {
+    public KeyPair doGetKeyPair() {
         return keyPair();
     }
 
