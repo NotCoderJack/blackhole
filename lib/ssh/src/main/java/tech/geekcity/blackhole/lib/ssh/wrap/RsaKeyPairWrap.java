@@ -133,7 +133,7 @@ public abstract class RsaKeyPairWrap {
         return keyPair();
     }
 
-    private KeyPair keyPair() {
+    protected KeyPair keyPair() {
         if (null == keyPair) {
             try {
                 ObjectInputStream objectInputStream = new ObjectInputStream(
