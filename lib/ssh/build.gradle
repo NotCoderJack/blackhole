@@ -37,9 +37,10 @@ dependencies {
     implementation("org.apache.sshd:sshd-scp:${minaSshVersion}")
     implementation("commons-io:commons-io:2.4")
 
-    testImplementation("junit:junit:4.12")
+    testImplementation(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-api"))
+    testRuntimeOnly(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-engine"))
     testImplementation("org.slf4j:slf4j-simple:${slf4jVersion}")
 }
 test {
-    useJUnit()
+    useJUnitPlatform()
 }

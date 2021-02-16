@@ -29,9 +29,10 @@ dependencies {
     implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-annotations"))
     implementation(project.rootProject.ext.jarDependency("com.google.guava", "guava"))
     implementation(project.rootProject.ext.jarDependency("org.freemarker", "freemarker"))
-    testImplementation(project.rootProject.ext.jarDependency("junit", "junit"))
+    testImplementation(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-api"))
+    testRuntimeOnly(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-engine"))
 }
 
 test {
-    useJUnit()
+    useJUnitPlatform()
 }
