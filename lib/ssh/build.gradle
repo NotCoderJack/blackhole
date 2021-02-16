@@ -24,6 +24,7 @@ repositories {
 dependencies {
     implementation(project.rootProject.project("lib:core"))
     implementation(project.rootProject.project("lib:docker"))
+    implementation(project.rootProject.project("lib:render"))
     processor(project.rootProject.ext.jarDependency("org.inferred", "freebuilder"))
     implementation(project.rootProject.ext.jarDependency("com.google.guava", "guava"))
     implementation(project.rootProject.ext.jarDependency("org.apache.commons", "commons-lang3"))
@@ -34,6 +35,7 @@ dependencies {
     implementation(project.rootProject.ext.jarDependency("commons-io", "commons-io"))
     implementation(project.rootProject.ext.jarDependency("org.apache.sshd", "sshd-core"))
     implementation(project.rootProject.ext.jarDependency("org.apache.sshd", "sshd-scp"))
+    implementation(project.rootProject.ext.jarDependency("com.github.docker-java", "docker-java-core"))
 
     testImplementation(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-api"))
     testRuntimeOnly(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-engine"))
