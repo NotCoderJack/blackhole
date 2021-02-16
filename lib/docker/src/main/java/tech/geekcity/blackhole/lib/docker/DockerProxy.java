@@ -142,6 +142,10 @@ public abstract class DockerProxy implements Configurable {
             @Nullable List<String> portBindList,
             boolean privileged,
             boolean autoRemove) {
+        List<PortBinding> portBindingList = null == portBindList ? Collections.emptyList()
+                : portBindList.stream()
+                .map(PortBinding::parse)
+                .collect(Collectors.toList());
         HostConfig hostConfig = HostConfig.newHostConfig()
                 .withPrivileged(privileged)
                 .withAutoRemove(autoRemove)
@@ -149,13 +153,13 @@ public abstract class DockerProxy implements Configurable {
                         : volumeBindList.stream()
                         .map(Bind::parse)
                         .collect(Collectors.toList()))
-                .withPortBindings(null == portBindList ? Collections.emptyList()
-                        : portBindList.stream()
-                        .map(PortBinding::parse)
-                        .collect(Collectors.toList()));
+                .withPortBindings(portBindingList);
         CreateContainerCmd createContainerCmd = dockerClient.createContainerCmd(imageNameWithTag)
                 .withName(containerName)
-                .withHostConfig(hostConfig);
+                .withHostConfig(hostConfig)
+                .withExposedPorts(portBindingList.stream()
+                        .map(PortBinding::getExposedPort)
+                        .collect(Collectors.toList()));
         if (null != cmd) {
             createContainerCmd.withCmd(cmd);
         }
