@@ -9,6 +9,7 @@ import org.apache.sshd.client.scp.ScpClientCreator;
 import org.apache.sshd.client.session.ClientSession;
 import org.inferred.freebuilder.FreeBuilder;
 import tech.geekcity.blackhole.lib.core.Configurable;
+import tech.geekcity.blackhole.lib.ssh.wrap.SshClientWrap;
 
 import java.io.IOException;
 import java.util.Collection;

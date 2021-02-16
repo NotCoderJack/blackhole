@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.inferred.freebuilder.FreeBuilder;
 import tech.geekcity.blackhole.lib.core.Configurable;
 import tech.geekcity.blackhole.lib.core.exception.BugException;
+import tech.geekcity.blackhole.lib.ssh.wrap.RsaKeyPairWrap;
 
 import java.io.IOException;
 import java.security.KeyPair;
@@ -60,7 +61,8 @@ public abstract class RsaKeyPairGenerator implements Configurable {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
             keyPairGenerator.initialize(keySize());
             KeyPair keyPair = keyPairGenerator.generateKeyPair();
-            rsaKeyPairWrap = new RsaKeyPairWrap(keyPair);
+            rsaKeyPairWrap = RsaKeyPairWrap.Builder.newInstance()
+                    .parseFromKeyPair(keyPair);
         } catch (NoSuchAlgorithmException e) {
             throw BugException.wrap(e);
         }

@@ -6,9 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 import tech.geekcity.blackhole.lib.core.exception.NotSupportedException;
-import tech.geekcity.blackhole.lib.ssh.RsaKeyPairWrap;
+import tech.geekcity.blackhole.lib.ssh.wrap.RsaKeyPairWrap;
 import tech.geekcity.blackhole.lib.ssh.SimpleScp;
-import tech.geekcity.blackhole.lib.ssh.SshClientWrap;
+import tech.geekcity.blackhole.lib.ssh.wrap.SshClientWrap;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +47,9 @@ public class RemoteFileTransfer implements Callable<Integer> {
     @Override
     public Integer call() throws IOException, ClassNotFoundException, NotSupportedException {
         byte[] keyPairDataBytes = FileUtils.readFileToByteArray(keyPairFile);
-        KeyPair keyPair = RsaKeyPairWrap.deserialize(keyPairDataBytes).keyPair();
+        KeyPair keyPair = RsaKeyPairWrap.Builder.newInstance()
+                .parseFromKeyPairDataBytes(keyPairDataBytes)
+                .doGetKeyPair();
         try (SimpleScp simpleScp = SimpleScp.Builder.newInstance()
                 .sshClientWrap(SshClientWrap.Builder.newInstance()
                         .username(username)
