@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
-import com.github.dockerjava.api.command.BuildImageCmd;
-import com.github.dockerjava.api.command.BuildImageResultCallback;
-import com.github.dockerjava.api.command.ListImagesCmd;
-import com.github.dockerjava.api.command.VersionCmd;
+import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
@@ -140,7 +137,7 @@ public abstract class DockerProxy implements Configurable {
     public void startContainer(
             String imageNameWithTag,
             String containerName,
-            List<String> cmd,
+            @Nullable List<String> cmd,
             @Nullable List<String> volumeBindList,
             @Nullable List<String> portBindList,
             boolean privileged,
@@ -156,12 +153,14 @@ public abstract class DockerProxy implements Configurable {
                         : portBindList.stream()
                         .map(PortBinding::parse)
                         .collect(Collectors.toList()));
+        CreateContainerCmd createContainerCmd = dockerClient.createContainerCmd(imageNameWithTag)
+                .withName(containerName)
+                .withHostConfig(hostConfig);
+        if (null != cmd) {
+            createContainerCmd.withCmd(cmd);
+        }
         dockerClient.startContainerCmd(
-                dockerClient.createContainerCmd(imageNameWithTag)
-                        .withName(containerName)
-                        .withHostConfig(hostConfig)
-                        .withCmd(cmd)
-                        .exec()
+                createContainerCmd.exec()
                         .getId()
         ).exec();
     }
