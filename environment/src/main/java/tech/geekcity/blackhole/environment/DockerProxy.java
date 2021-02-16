@@ -72,7 +72,7 @@ public abstract class DockerProxy implements Closeable {
         }
     }
 
-    public void open() {
+    public void configure() {
         DockerClientConfig dockerClientConfig = DefaultDockerClientConfig.createDefaultConfigBuilder()
                 .build();
         DockerHttpClient dockerHttpClient = new ApacheDockerHttpClient.Builder()
@@ -113,20 +113,20 @@ public abstract class DockerProxy implements Closeable {
         return buildImageCmd.exec(new BuildImageResultCallback()).awaitImageId();
     }
 
-    public List<String> listImageId() {
+    public Image findImageByRepoTag(String expectedRepoTag) {
         ListImagesCmd listImagesCmd = dockerClient.listImagesCmd();
         List<Image> imageList = listImagesCmd.exec();
         return imageList.stream()
-                .map(Image::getId)
-                .collect(Collectors.toList());
+                .filter(image -> Arrays.asList(image.getRepoTags())
+                        .contains(expectedRepoTag))
+                .findAny()
+                .orElse(null);
     }
 
-    public List<String> listImage() {
-        ListImagesCmd listImagesCmd = dockerClient.listImagesCmd();
-        List<Image> imageList = listImagesCmd.exec();
-        return imageList.stream()
-                .flatMap(image -> Arrays.stream(image.getRepoTags()))
-                .collect(Collectors.toList());
+    @Nullable
+    public Image findImageByName(String imageName, String tag) {
+        return findImageByRepoTag(
+                String.format("%s:%s", imageName, tag));
     }
 
     public void startContainer(String imageNameWithTag, String containerName, List<String> cmd) {
