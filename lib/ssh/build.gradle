@@ -21,25 +21,23 @@ repositories {
     }
 }
 
-def slf4jVersion = "1.7.15"
-def jacksonVersion = "2.9.8"
-def minaSshVersion = "2.5.1"
 dependencies {
     implementation(project.rootProject.project("lib:core"))
-    processor "org.inferred:freebuilder:2.6.1"
-    implementation("com.google.guava:guava:29.0-jre")
-    implementation("org.apache.commons:commons-lang3:3.0")
-    implementation("org.slf4j:slf4j-api:${slf4jVersion}")
-    implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
-    implementation("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}")
-    implementation("org.apache.sshd:sshd-core:${minaSshVersion}")
-    implementation("org.apache.sshd:sshd-scp:${minaSshVersion}")
-    implementation("commons-io:commons-io:2.4")
+    implementation(project.rootProject.project("lib:docker"))
+    processor(project.rootProject.ext.jarDependency("org.inferred", "freebuilder"))
+    implementation(project.rootProject.ext.jarDependency("com.google.guava", "guava"))
+    implementation(project.rootProject.ext.jarDependency("org.apache.commons", "commons-lang3"))
+    testImplementation(project.rootProject.ext.jarDependency("org.slf4j", "slf4j-simple"))
+    implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-core"))
+    implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-databind"))
+    implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-annotations"))
+    implementation(project.rootProject.ext.jarDependency("commons-io", "commons-io"))
+    implementation(project.rootProject.ext.jarDependency("org.apache.sshd", "sshd-core"))
+    implementation(project.rootProject.ext.jarDependency("org.apache.sshd", "sshd-scp"))
 
     testImplementation(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-api"))
     testRuntimeOnly(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-engine"))
-    testImplementation("org.slf4j:slf4j-simple:${slf4jVersion}")
+    testImplementation(project.rootProject.ext.jarDependency("org.slf4j", "slf4j-simple"))
 }
 test {
     useJUnitPlatform()
