@@ -8,9 +8,7 @@ import org.inferred.freebuilder.FreeBuilder;
 import tech.geekcity.blackhole.lib.core.exception.BugException;
 
 import java.io.*;
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
 
@@ -49,6 +47,13 @@ public abstract class RsaKeyPairWrap {
 
         public RsaKeyPairWrap parseFromJson(String json) throws IOException {
             return objectMapper.readValue(json, RsaKeyPairWrap.class);
+        }
+
+        public RsaKeyPairWrap generate(int size) throws NoSuchAlgorithmException, IOException {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            keyPairGenerator.initialize(size);
+            KeyPair keyPair = keyPairGenerator.generateKeyPair();
+            return parseFromKeyPair(keyPair);
         }
 
         public RsaKeyPairWrap parseFromKeyPair(KeyPair keyPair) throws IOException {

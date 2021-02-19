@@ -29,6 +29,14 @@ public class RsaKeyPairWrapTest {
     }
 
     @Test
+    void testGenerate() throws IOException, NoSuchAlgorithmException {
+        RsaKeyPairWrap generated = RsaKeyPairWrap.Builder.newInstance()
+                .generate(2048);
+        // TODO validation?
+        Assertions.assertNotNull(generated);
+    }
+
+    @Test
     void testPrivateKey() {
         Assertions.assertEquals(keyPair.getPrivate(), rsaKeyPairWrap.privateKey());
     }
