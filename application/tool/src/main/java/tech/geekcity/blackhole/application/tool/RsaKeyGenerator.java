@@ -5,12 +5,13 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
-import tech.geekcity.blackhole.lib.ssh.RsaKeyPairGenerator;
+import tech.geekcity.blackhole.lib.ssh.wrap.RsaKeyPairWrap;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(
@@ -35,38 +36,35 @@ public class RsaKeyGenerator implements Callable<Integer> {
     private String user;
 
     @Override
-    public Integer call() throws IOException {
-        try (RsaKeyPairGenerator rsaKeyPairGenerator = RsaKeyPairGenerator.Builder.newInstance()
-                .keySize(keySize)
-                .build()) {
-            rsaKeyPairGenerator.configure();
-            // TODO check exists
-            if (idRsaFile.exists() && idRsaPubFile.exists() && existsDoNothing) {
-                LOGGER.info(
-                        "DO NOTHING: idRsaFile({}) and idRsaPubFile({}) exists, existsDoNothing({})",
-                        idRsaFile.getAbsolutePath(),
-                        idRsaPubFile.getAbsolutePath(),
-                        existsDoNothing
-                );
-                return 0;
-            }
-            if (!overwriteExistingFile && idRsaFile.exists()) {
-                LOGGER.error(
-                        "idRsaFile({}) exists! use --overwrite true to overwrite", idRsaFile.getAbsolutePath());
-                return -1;
-            }
-            if (!overwriteExistingFile && idRsaPubFile.exists()) {
-                LOGGER.error(
-                        "idRsaPubFile({}) exists! use --overwrite true to overwrite", idRsaPubFile.getAbsolutePath());
-                return -2;
-            }
-            FileUtils.writeStringToFile(idRsaFile, rsaKeyPairGenerator.rsaKeyPairWrap().privateKeyAsString());
-            FileUtils.writeStringToFile(idRsaPubFile, rsaKeyPairGenerator.rsaKeyPairWrap().publicKeyAsString(user));
-            FileUtils.writeByteArrayToFile(keyPairFile, rsaKeyPairGenerator.rsaKeyPairWrap().asBytes());
-            Files.setPosixFilePermissions(
-                    idRsaFile.toPath(),
-                    ImmutableSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE));
+    public Integer call() throws IOException, NoSuchAlgorithmException {
+        // TODO check exists
+        if (idRsaFile.exists() && idRsaPubFile.exists() && existsDoNothing) {
+            LOGGER.info(
+                    "DO NOTHING: idRsaFile({}) and idRsaPubFile({}) exists, existsDoNothing({})",
+                    idRsaFile.getAbsolutePath(),
+                    idRsaPubFile.getAbsolutePath(),
+                    existsDoNothing
+            );
             return 0;
         }
+        if (!overwriteExistingFile && idRsaFile.exists()) {
+            LOGGER.error(
+                    "idRsaFile({}) exists! use --overwrite true to overwrite", idRsaFile.getAbsolutePath());
+            return -1;
+        }
+        if (!overwriteExistingFile && idRsaPubFile.exists()) {
+            LOGGER.error(
+                    "idRsaPubFile({}) exists! use --overwrite true to overwrite", idRsaPubFile.getAbsolutePath());
+            return -2;
+        }
+        RsaKeyPairWrap rsaKeyPairWrap = RsaKeyPairWrap.Builder.newInstance()
+                .generate(keySize);
+        FileUtils.writeStringToFile(idRsaFile, rsaKeyPairWrap.privateKeyAsString());
+        FileUtils.writeStringToFile(idRsaPubFile, rsaKeyPairWrap.publicKeyAsString(user));
+        FileUtils.writeStringToFile(keyPairFile, rsaKeyPairWrap.toBuilder().toJsonSilently());
+        Files.setPosixFilePermissions(
+                idRsaFile.toPath(),
+                ImmutableSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE));
+        return 0;
     }
 }
