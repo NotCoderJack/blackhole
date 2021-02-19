@@ -11,7 +11,7 @@
         * [centos.7.virtualbox.ovf.tar.gz](https://pan.baidu.com/s/1HpCvnnXlKRJrgF7jbmUvvQ) code: vne2
     3. extract
         * ```tar zxvf centos.7.virtualbox.ovf.tar.gz```
-        * cd centos.7.virtualbox.ovf
+        * ```cd centos.7.virtualbox.ovf```
     4. import
         * ```shell
           VBoxManage import centos7.20210219.ovf \
@@ -26,6 +26,7 @@
               --settingsfile $HOME/VirtualBox\ VMs/cloud02/cloud02.vbox \
               --cpus 1 \
               --memory 1024
+          VBoxManage list vms
           ```
     5. start
         * without headless to login and check the ip adress
@@ -38,3 +39,6 @@
           VBoxManage startvm cloud01 --type headless
           VBoxManage startvm cloud02 --type headless
           ```
+    6. stop
+        * ```VBoxManage controlvm cloud01 poweroff```
+        * ```VBoxManage controlvm cloud02 poweroff```
