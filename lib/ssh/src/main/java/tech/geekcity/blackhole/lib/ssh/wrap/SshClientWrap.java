@@ -10,6 +10,7 @@ import org.apache.sshd.client.session.ClientSession;
 import org.inferred.freebuilder.FreeBuilder;
 import tech.geekcity.blackhole.lib.core.Configurable;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.security.KeyPair;
 
@@ -58,7 +59,14 @@ public abstract class SshClientWrap implements Configurable {
 
     public abstract int port();
 
+    // TODO remove
     public abstract KeyPair keyPair();
+
+    @Nullable
+    public abstract String password();
+
+    @Nullable
+    public abstract RsaKeyPairWrap rsaKeyPairWrap();
 
     @Override
     public void configure() throws IOException {
@@ -68,7 +76,20 @@ public abstract class SshClientWrap implements Configurable {
         clientSession = sshClient.connect(username(), host(), port())
                 .verify()
                 .getSession();
-        clientSession.addPublicKeyIdentity(keyPair());
+        String password = password();
+        RsaKeyPairWrap rsaKeyPairWrap = rsaKeyPairWrap();
+        // TODO remove
+        if (null == password && null == rsaKeyPairWrap) {
+            clientSession.addPublicKeyIdentity(keyPair());
+        }
+        // TODO active
+        // Preconditions.checkArgument(null != password && null != rsaKeyPairWrap);
+        if (null != password) {
+            clientSession.addPasswordIdentity(password);
+        }
+        if (null != rsaKeyPairWrap) {
+            clientSession.addPublicKeyIdentity(rsaKeyPairWrap.keyPair());
+        }
         clientSession.auth().verify();
     }
 

@@ -12,7 +12,8 @@ import tech.geekcity.blackhole.lib.ssh.wrap.SshClientWrap;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.security.KeyPair;
+import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -20,21 +21,19 @@ import java.util.stream.IntStream;
 public class TestSsh {
     private static final String REMOTE_TEMP_DIRECTORY = "/tmp";
     private transient String localTempDirectory;
-    private transient KeyPair keyPair;
+    private transient RsaKeyPairWrap rsaKeyPairWrap;
 
     @BeforeEach
-    public void setUp() throws IOException, ClassNotFoundException {
+    public void setUp() throws IOException, NoSuchAlgorithmException {
         localTempDirectory = System.getProperty("java.io.tmpdir");
-        byte[] keyPairDataBytes = FileUtils.readFileToByteArray(new File("../tool/dim/sshd/id_rsa.key.pair"));
-        keyPair = RsaKeyPairWrap.Builder.newInstance()
-                .parseFromKeyPairDataBytes(keyPairDataBytes)
-                .doGetKeyPair();
+        rsaKeyPairWrap = RsaKeyPairWrap.Builder.newInstance()
+                .generate(2048);
     }
 
     @AfterEach
     public void tearDown() {
         localTempDirectory = null;
-        keyPair = null;
+        rsaKeyPairWrap = null;
     }
 
     @Test
@@ -44,7 +43,7 @@ public class TestSsh {
                         .username("root")
                         .host("localhost")
                         .port(2222)
-                        .keyPair(keyPair)
+                        .rsaKeyPairWrap(rsaKeyPairWrap)
                         .build())
                 .standardOutput(System.out)
                 .errorOutput(System.err)
@@ -70,7 +69,7 @@ public class TestSsh {
                         .username("root")
                         .host("localhost")
                         .port(2222)
-                        .keyPair(keyPair)
+                        .rsaKeyPairWrap(rsaKeyPairWrap)
                         .build())
                 .build()) {
             simpleScp.configure();
@@ -91,9 +90,11 @@ public class TestSsh {
         fileList.forEach(file -> {
             try {
                 Assertions.assertEquals(
-                        FileUtils.readFileToString(file),
+                        FileUtils.readFileToString(file, StandardCharsets.UTF_8),
                         FileUtils.readFileToString(
-                                new File(String.format("%s/%s", localTempDirectory, file.getName()))));
+                                new File(String.format("%s/%s", localTempDirectory, file.getName())),
+                                StandardCharsets.UTF_8
+                        ));
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -103,7 +104,10 @@ public class TestSsh {
     private File createRandomTempFile() throws IOException {
         File randomTempFile = File.createTempFile("random_temp_", ".txt");
         randomTempFile.deleteOnExit();
-        FileUtils.writeStringToFile(randomTempFile, RandomStringUtils.randomAlphanumeric(128));
+        FileUtils.writeStringToFile(
+                randomTempFile,
+                RandomStringUtils.randomAlphanumeric(128),
+                StandardCharsets.UTF_8);
         return randomTempFile;
     }
 }

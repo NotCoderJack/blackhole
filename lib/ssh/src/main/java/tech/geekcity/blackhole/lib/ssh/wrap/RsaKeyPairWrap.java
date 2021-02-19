@@ -67,32 +67,9 @@ public abstract class RsaKeyPairWrap {
             );
             return build();
         }
-
-        @Deprecated
-        public RsaKeyPairWrap parseFromKeyPairDataBytes(byte[] keyPairDataBytes)
-                throws IOException, ClassNotFoundException {
-            ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(keyPairDataBytes));
-            Object object = objectInputStream.readObject();
-            Preconditions.checkArgument(
-                    object instanceof KeyPair,
-                    "object(%s) is not an instance of %s",
-                    object.getClass().getName(), KeyPair.class.getName());
-            return RsaKeyPairWrap.Builder.newInstance()
-                    .parseFromKeyPair((KeyPair) object);
-        }
     }
 
     public abstract String keyValuePairBase64();
-
-    @Deprecated
-    public byte[] asBytes() throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-        objectOutputStream.writeObject(keyPair());
-        objectOutputStream.flush();
-        objectOutputStream.close();
-        return byteArrayOutputStream.toByteArray();
-    }
 
     public PrivateKey privateKey() {
         return keyPair().getPrivate();
@@ -131,11 +108,6 @@ public abstract class RsaKeyPairWrap {
         return String.format(
                 "-----BEGIN RSA PRIVATE KEY-----\n%s\n-----END RSA PRIVATE KEY-----\n",
                 Base64.getMimeEncoder().encodeToString(privateKey.getEncoded()));
-    }
-
-    @Deprecated
-    public KeyPair doGetKeyPair() {
-        return keyPair();
     }
 
     protected KeyPair keyPair() {

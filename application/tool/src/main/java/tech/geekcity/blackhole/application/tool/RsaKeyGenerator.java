@@ -61,7 +61,7 @@ public class RsaKeyGenerator implements Callable<Integer> {
                 .generate(keySize);
         FileUtils.writeStringToFile(idRsaFile, rsaKeyPairWrap.privateKeyAsString());
         FileUtils.writeStringToFile(idRsaPubFile, rsaKeyPairWrap.publicKeyAsString(user));
-        FileUtils.writeByteArrayToFile(keyPairFile, rsaKeyPairWrap.asBytes());
+        FileUtils.writeStringToFile(keyPairFile, rsaKeyPairWrap.toBuilder().toJsonSilently());
         Files.setPosixFilePermissions(
                 idRsaFile.toPath(),
                 ImmutableSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE));

@@ -6,13 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 import tech.geekcity.blackhole.lib.core.exception.NotSupportedException;
-import tech.geekcity.blackhole.lib.ssh.wrap.RsaKeyPairWrap;
 import tech.geekcity.blackhole.lib.ssh.SimpleScp;
+import tech.geekcity.blackhole.lib.ssh.wrap.RsaKeyPairWrap;
 import tech.geekcity.blackhole.lib.ssh.wrap.SshClientWrap;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.KeyPair;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -45,17 +44,15 @@ public class RemoteFileTransfer implements Callable<Integer> {
     private File[] remoteFiles;
 
     @Override
-    public Integer call() throws IOException, ClassNotFoundException, NotSupportedException {
-        byte[] keyPairDataBytes = FileUtils.readFileToByteArray(keyPairFile);
-        KeyPair keyPair = RsaKeyPairWrap.Builder.newInstance()
-                .parseFromKeyPairDataBytes(keyPairDataBytes)
-                .doGetKeyPair();
+    public Integer call() throws IOException, NotSupportedException {
+        RsaKeyPairWrap rsaKeyPairWrap = RsaKeyPairWrap.Builder.newInstance()
+                .parseFromJson(FileUtils.readFileToString(keyPairFile));
         try (SimpleScp simpleScp = SimpleScp.Builder.newInstance()
                 .sshClientWrap(SshClientWrap.Builder.newInstance()
                         .username(username)
                         .host(remoteHost)
                         .port(remotePort)
-                        .keyPair(keyPair)
+                        .rsaKeyPairWrap(rsaKeyPairWrap)
                         .build())
                 .build()) {
             simpleScp.configure();

@@ -77,7 +77,7 @@ public abstract class SshCommander implements Configurable {
     }
 
     public int run(String command) throws IOException {
-        return run(command, 0L);
+        return run(command, -1L);
     }
 
     public int run(String command, long timeoutInMilliseconds) throws IOException {
