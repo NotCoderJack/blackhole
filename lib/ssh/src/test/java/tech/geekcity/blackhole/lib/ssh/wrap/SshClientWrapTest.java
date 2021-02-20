@@ -33,7 +33,6 @@ public class SshClientWrapTest extends AbstractSshClientTest {
                 stderr,
                 StandardCharsets.UTF_8);
         Assertions.assertEquals(super.publicKey(), stdout.toString());
-        Assertions.assertEquals(
-                "", stderr.toString());
+        Assertions.assertEquals("", stderr.toString());
     }
 }
