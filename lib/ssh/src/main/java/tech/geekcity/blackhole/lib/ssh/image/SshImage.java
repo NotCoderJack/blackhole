@@ -29,25 +29,25 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 @FreeBuilder
-@JsonDeserialize(builder = Ssh.Builder.class)
-public abstract class Ssh implements Configurable {
-    public static final Logger LOGGER = LoggerFactory.getLogger(Ssh.class);
-    public static final String IMAGE_NAME = DockerUtil.camelToSnake(Ssh.class.getSimpleName());
+@JsonDeserialize(builder = SshImage.Builder.class)
+public abstract class SshImage implements Configurable {
+    public static final Logger LOGGER = LoggerFactory.getLogger(SshImage.class);
+    public static final String IMAGE_NAME = DockerUtil.camelToSnake(SshImage.class.getSimpleName());
     private transient DockerProxy dockerProxy;
     private transient File buildDirectory;
     private transient File dockerFile;
     private transient String centOsBaseImage;
 
     /**
-     * Returns a new {@link Builder} with the same property values as this {@link Ssh}
+     * Returns a new {@link Builder} with the same property values as this {@link SshImage}
      */
     public abstract Builder toBuilder();
 
     /**
-     * Builder of {@link Ssh} instances
+     * Builder of {@link SshImage} instances
      * auto generated builder className which cannot be modified
      */
-    public static class Builder extends Ssh_Builder {
+    public static class Builder extends SshImage_Builder {
         private ObjectMapper objectMapper = new ObjectMapper();
 
         public static Builder newInstance() {
@@ -66,8 +66,8 @@ public abstract class Ssh implements Configurable {
             }
         }
 
-        public Ssh parseFromJson(String json) throws IOException {
-            return objectMapper.readValue(json, Ssh.class);
+        public SshImage parseFromJson(String json) throws IOException {
+            return objectMapper.readValue(json, SshImage.class);
         }
     }
 
