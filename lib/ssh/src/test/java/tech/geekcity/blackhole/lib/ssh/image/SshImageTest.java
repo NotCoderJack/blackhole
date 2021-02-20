@@ -17,7 +17,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.concurrent.TimeUnit;
 
-public class SshTest {
+public class SshImageTest {
     private static final String TAG = "v_test_1.0";
     private transient DockerProxy dockerProxy;
 
@@ -35,12 +35,12 @@ public class SshTest {
 
     @Test
     void testBuild() throws IOException {
-        try (Ssh ssh = Ssh.Builder.newInstance()
+        try (SshImage sshImage = SshImage.Builder.newInstance()
                 .tag(TAG)
                 .build()) {
-            ssh.configure();
-            String imageId = ssh.buildImage();
-            Image image = dockerProxy.findImageByName(Ssh.IMAGE_NAME, TAG);
+            sshImage.configure();
+            String imageId = sshImage.buildImage();
+            Image image = dockerProxy.findImageByName(SshImage.IMAGE_NAME, TAG);
             Assertions.assertNotNull(image);
             Assertions.assertTrue(
                     image.getId()
@@ -53,12 +53,12 @@ public class SshTest {
         // /tmp is docker engine(docker desktop for mac os) default shared path
         File tempFileDirectory = new File("/tmp/blackhole/test");
         File authorizedKeysFile = null;
-        try (Ssh ssh = Ssh.Builder.newInstance()
+        try (SshImage sshImage = SshImage.Builder.newInstance()
                 .tag(TAG)
                 .build()) {
-            ssh.configure();
+            sshImage.configure();
             // build it first
-            ssh.buildImage();
+            sshImage.buildImage();
             tempFileDirectory.mkdirs();
             authorizedKeysFile = File.createTempFile(
                     "authorized_keys.", ".tmp", tempFileDirectory);
@@ -67,7 +67,7 @@ public class SshTest {
                     PosixFilePermissions.fromString("rw-------"));
             FileUtils.writeStringToFile(authorizedKeysFile, "this is a test", StandardCharsets.UTF_8);
             String containerName = "test_ssh_container";
-            ssh.startContainer(
+            sshImage.startContainer(
                     containerName,
                     authorizedKeysFile,
                     9022);
@@ -77,7 +77,7 @@ public class SshTest {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            ssh.stopContainer(containerName);
+            sshImage.stopContainer(containerName);
         } finally {
             if (null != authorizedKeysFile) {
                 authorizedKeysFile.delete();
