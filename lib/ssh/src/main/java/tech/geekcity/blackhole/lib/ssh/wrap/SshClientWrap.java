@@ -85,8 +85,8 @@ public abstract class SshClientWrap implements Configurable {
         sshClient.setServerKeyVerifier(
                 new DefaultKnownHostsServerKeyVerifier(
                         AcceptAllServerKeyVerifier.INSTANCE,
-                        true,
-                        new File("/dev/null")));
+                        strictCheck(),
+                        knownHostsFile()));
         sshClient.start();
         clientSession = sshClient.connect(username(), host(), port())
                 .verify()

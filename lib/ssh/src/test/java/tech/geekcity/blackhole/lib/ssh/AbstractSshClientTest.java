@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractSshClientTest implements Configurable {
     private static final String USERNAME = "root";
@@ -100,5 +101,11 @@ public abstract class AbstractSshClientTest implements Configurable {
                 CONTAINER_NAME,
                 authorizedKeysFile,
                 remotePort);
+        try {
+            // TODO check container has already started
+            TimeUnit.SECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
