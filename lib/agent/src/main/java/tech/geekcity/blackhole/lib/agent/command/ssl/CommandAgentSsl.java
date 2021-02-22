@@ -13,7 +13,7 @@ import io.grpc.netty.shaded.io.netty.handler.ssl.SslProvider;
 import org.inferred.freebuilder.FreeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.geekcity.blackhole.lib.agent.command.CommandAgent;
+import tech.geekcity.blackhole.lib.agent.command.api.CommandAgent;
 import tech.geekcity.blackhole.lib.agent.command.CommandService;
 
 import javax.annotation.Nullable;

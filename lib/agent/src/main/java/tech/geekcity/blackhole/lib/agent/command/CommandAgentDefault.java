@@ -8,6 +8,7 @@ import io.grpc.ServerBuilder;
 import org.inferred.freebuilder.FreeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.geekcity.blackhole.lib.agent.command.api.CommandAgent;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
