@@ -1,4 +1,4 @@
-package tech.geekcity.blackhole.lib.agent.command;
+package tech.geekcity.blackhole.lib.agent.command.api;
 
 import tech.geekcity.blackhole.lib.core.Runner;
 

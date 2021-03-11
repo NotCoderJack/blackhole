@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
-import tech.geekcity.blackhole.lib.agent.command.CommandAgent;
+import tech.geekcity.blackhole.lib.agent.command.api.CommandAgent;
 import tech.geekcity.blackhole.lib.agent.command.CommandAgentDefault;
 import tech.geekcity.blackhole.lib.agent.command.ssl.CommandAgentSsl;
 

@@ -11,7 +11,7 @@ import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import org.inferred.freebuilder.FreeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.geekcity.blackhole.lib.agent.command.CommandClient;
+import tech.geekcity.blackhole.lib.agent.command.api.CommandClient;
 import tech.geekcity.blackhole.lib.agent.command.grpc.CommandAgentGrpc;
 import tech.geekcity.blackhole.lib.agent.command.grpc.CommandBox;
 import tech.geekcity.blackhole.lib.agent.command.grpc.CommandResult;
