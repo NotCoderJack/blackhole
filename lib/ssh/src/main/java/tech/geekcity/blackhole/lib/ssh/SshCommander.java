@@ -87,7 +87,7 @@ public abstract class SshCommander implements Configurable {
             channel.setErr(errorOutput());
             channel.open().verify();
             channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), timeoutInMilliseconds);
+            return channel.getExitStatus();
         }
-        return 0;
     }
 }

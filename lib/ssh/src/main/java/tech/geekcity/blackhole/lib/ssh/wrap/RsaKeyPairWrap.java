@@ -96,7 +96,7 @@ public abstract class RsaKeyPairWrap {
             dataOutputStream.flush();
             dataOutputStream.close();
             return String.format(
-                    "%s %s %s",
+                    "%s %s %s\n",
                     algorithmDescriptor, Base64.getEncoder().encodeToString(byteArrayOutputStream.toByteArray()), user);
         } catch (IOException e) {
             throw BugException.wrap(e);
