@@ -4,30 +4,26 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.io.FileUtils;
 import org.inferred.freebuilder.FreeBuilder;
 import tech.geekcity.blackhole.application.army.knife.ssh.SshConnector;
 import tech.geekcity.blackhole.lib.core.Configurable;
 
 import javax.annotation.Nullable;
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 
 @FreeBuilder
-@JsonDeserialize(builder = DockerEngineInstaller.Builder.class)
-public abstract class DockerEngineInstaller extends Installer implements Configurable {
+@JsonDeserialize(builder = K8sBaseInstaller.Builder.class)
+public abstract class K8sBaseInstaller extends Installer implements Configurable {
     /**
-     * Returns a new {@link Builder} with the same property values as this {@link DockerEngineInstaller}
+     * Returns a new {@link Builder} with the same property values as this {@link K8sBaseInstaller}
      */
     public abstract Builder toBuilder();
 
     /**
-     * Builder of {@link DockerEngineInstaller} instances
+     * Builder of {@link K8sBaseInstaller} instances
      * auto generated builder className which cannot be modified
      */
-    public static class Builder extends DockerEngineInstaller_Builder {
+    public static class Builder extends K8sBaseInstaller_Builder {
         private ObjectMapper objectMapper = new ObjectMapper();
 
         public static Builder newInstance() {
@@ -50,8 +46,8 @@ public abstract class DockerEngineInstaller extends Installer implements Configu
             }
         }
 
-        public DockerEngineInstaller parseFromJson(String json) throws IOException {
-            return objectMapper.readValue(json, DockerEngineInstaller.class);
+        public K8sBaseInstaller parseFromJson(String json) throws IOException {
+            return objectMapper.readValue(json, K8sBaseInstaller.class);
         }
     }
 
@@ -75,25 +71,50 @@ public abstract class DockerEngineInstaller extends Installer implements Configu
 
     public void install() throws IOException {
         super.createTempFileAndUpload(
-                "docker.ce.aliyun.",
+                "modules.load.k8s.",
+                ".conf",
+                modulesLoadK8sConfig(),
+                "/etc/modules-load.d/k8s.conf");
+        super.createTempFileAndUpload(
+                "sysctl.k8s.",
+                ".conf",
+                sysctlK8sConfig(),
+                "/etc/sysctl.d/k8s.conf");
+        super.createTempFileAndUpload(
+                "kubernetes.aliyun.",
                 ".repo",
-                dockerCeRepoString(),
-                "/etc/yum.repos.d/docker.ce.aliyun.repo");
+                kubernetesAliyunRepo(),
+                "/etc/yum.repos.d/kubernetes.aliyun.repo");
         ImmutableList.of(
-                "yum install -y yum-utils device-mapper-persistent-data lvm2",
-                "yum makecache fast",
-                "yum -y install docker-ce",
-                "systemctl enable docker"
+                "sysctl --system",
+                "setenforce 0",
+                "sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config",
+                "yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes",
+                "systemctl enable kubelet"
         ).forEach(super::runSingleCommand);
         if (start()) {
-            super.runSingleCommand("systemctl start docker");
+            super.runSingleCommand("systemctl start kubelet");
         }
     }
 
-    private String dockerCeRepoString() throws IOException {
+    private String modulesLoadK8sConfig() throws IOException {
         return super.contentFromFileOrResource(
                 dockerCeRepoPath(),
-                "blackhole.army.knife/docker.ce.aliyun.repo"
+                "blackhole.army.knife/etc.modules.load.d.k8s.conf"
+        );
+    }
+
+    private String sysctlK8sConfig() throws IOException {
+        return super.contentFromFileOrResource(
+                dockerCeRepoPath(),
+                "blackhole.army.knife/etc.sysctl.d.k8s.conf"
+        );
+    }
+
+    private String kubernetesAliyunRepo() throws IOException {
+        return super.contentFromFileOrResource(
+                dockerCeRepoPath(),
+                "blackhole.army.knife/kubernetes.aliyun.repo"
         );
     }
 }
