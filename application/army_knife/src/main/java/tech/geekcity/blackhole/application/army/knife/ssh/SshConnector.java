@@ -9,15 +9,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.geekcity.blackhole.lib.core.Configurable;
 import tech.geekcity.blackhole.lib.core.exception.BugException;
+import tech.geekcity.blackhole.lib.ssh.SimpleScp;
 import tech.geekcity.blackhole.lib.ssh.SshCommander;
 import tech.geekcity.blackhole.lib.ssh.wrap.RsaKeyPairWrap;
 import tech.geekcity.blackhole.lib.ssh.wrap.SshClientWrap;
 
 import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 
 @FreeBuilder
 @JsonDeserialize(builder = SshConnector.Builder.class)
@@ -26,6 +29,7 @@ public abstract class SshConnector implements Configurable {
     private transient boolean configured = false;
     private transient RsaKeyPairWrap rsaKeyPairWrapToUse;
     private transient SshCommander sshCommander;
+    private transient SimpleScp simpleScp;
     private transient boolean validated = false;
 
     /**
@@ -86,9 +90,13 @@ public abstract class SshConnector implements Configurable {
 
     @Override
     public void close() throws IOException {
-        if (sshCommander != null) {
+        if (null != sshCommander) {
             sshCommander.close();
             sshCommander = null;
+        }
+        if (null != simpleScp) {
+            simpleScp.close();
+            simpleScp = null;
         }
         if (validated) {
             validated = false;
@@ -123,19 +131,30 @@ public abstract class SshConnector implements Configurable {
         }
         return sshCommander;
     }
+    public SimpleScp validateSimpleScp() throws IOException {
+        if (!validated) {
+            validate();
+        }
+        return simpleScp;
+    }
 
     private void validate() throws IOException {
+        SshClientWrap sshClientWrap = SshClientWrap.Builder.newInstance()
+                .username(username())
+                .host(host())
+                .port(port())
+                .rsaKeyPairWrap(rsaKeyPairWrapToUse)
+                .build();
         sshCommander = SshCommander.Builder.newInstance()
-                .sshClientWrap(SshClientWrap.Builder.newInstance()
-                        .username(username())
-                        .host(host())
-                        .port(port())
-                        .rsaKeyPairWrap(rsaKeyPairWrapToUse)
-                        .build())
+                .sshClientWrap(sshClientWrap)
                 .standardOutput(standardOutput())
                 .errorOutput(errorOutput())
                 .build();
+        simpleScp = SimpleScp.Builder.newInstance()
+                .sshClientWrap(sshClientWrap)
+                .build();
         sshCommander.configure();
+        simpleScp.configure();
         int returnCode = sshCommander.run("cat /etc/redhat-release");
         if (returnCode != 0) {
             throw new IOException(String.format(
@@ -143,6 +162,10 @@ public abstract class SshConnector implements Configurable {
                     standardOutput().toString(),
                     errorOutput().toString()));
         }
+        File tempFile = File.createTempFile("readhat-release.", ".tmp");
+        tempFile.delete();
+        simpleScp.download(Collections.singletonList("/etc/redhat-release"), tempFile.getAbsolutePath());
+        tempFile.delete();
         LOGGER.info("validation succeed: {} {}", standardOutput().toString(), errorOutput().toString());
     }
 

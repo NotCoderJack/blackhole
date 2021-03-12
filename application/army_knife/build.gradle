@@ -40,6 +40,12 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    systemProperty "blackhole.test.master_host", project.getProperties().getOrDefault("blackhole.test.master_host", null)
+    systemProperty "blackhole.test.master_port", project.getProperties().getOrDefault("blackhole.test.master_port", 22)
+    systemProperty "blackhole.test.worker_host", project.getProperties().getOrDefault("blackhole.test.worker_host", null)
+    systemProperty "blackhole.test.worker_port", project.getProperties().getOrDefault("blackhole.test.worker_port", 22)
+    systemProperty "blackhole.test.username", project.getProperties().getOrDefault("blackhole.test.username", "root")
+    systemProperty "blackhole.test.password", project.getProperties().getOrDefault("blackhole.test.password", "123456")
 }
 
 task runJar(type: Exec) {
