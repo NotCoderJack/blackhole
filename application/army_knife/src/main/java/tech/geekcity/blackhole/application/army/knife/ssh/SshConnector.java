@@ -154,6 +154,7 @@ public abstract class SshConnector implements Configurable {
                 .sshClientWrap(sshClientWrap)
                 .build();
         sshCommander.configure();
+        simpleScp.configure();
         int returnCode = sshCommander.run("cat /etc/redhat-release");
         if (returnCode != 0) {
             throw new IOException(String.format(

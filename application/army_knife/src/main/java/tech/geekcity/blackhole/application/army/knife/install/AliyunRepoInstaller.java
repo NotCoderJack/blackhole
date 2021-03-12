@@ -4,14 +4,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.inferred.freebuilder.FreeBuilder;
 import tech.geekcity.blackhole.application.army.knife.ssh.SshConnector;
 import tech.geekcity.blackhole.lib.core.Configurable;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.Objects;
 
 @FreeBuilder
 @JsonDeserialize(builder = AliyunRepoInstaller.Builder.class)
@@ -52,6 +55,9 @@ public abstract class AliyunRepoInstaller extends Installer implements Configura
     @Override
     public abstract SshConnector sshConnector();
 
+    @Nullable
+    public abstract String centos7RepoPath();
+
     @Override
     public void configure() throws IOException {
         super.configure();
@@ -65,17 +71,24 @@ public abstract class AliyunRepoInstaller extends Installer implements Configura
     public void install() throws IOException {
         super.runSingleCommand("rm -rf /etc/yum.repos.d/*");
         File centos7RepoFile = File.createTempFile("centos.7.aliyun.", ".repo");
-        FileUtils.writeStringToFile(centos7RepoFile, centos7Repo(), StandardCharsets.UTF_8);
+        FileUtils.writeStringToFile(centos7RepoFile, centos7RepoString(), StandardCharsets.UTF_8);
         super.simpleScp().upload(
                 Collections.singletonList(
                         centos7RepoFile.getAbsolutePath()),
-                "/etc/yum.repos.d/docker.ce.aliyun.repo");
+                "/etc/yum.repos.d/centos.7.aliyun.repo");
         centos7RepoFile.delete();
     }
 
-    private String centos7Repo() {
-        return this.getClass()
-                .getResourceAsStream("blackhole.army.knife/centos.7.aliyun.repo")
-                .toString();
+    private String centos7RepoString() throws IOException {
+        String centos7RepoPath = centos7RepoPath();
+        if (null != centos7RepoPath) {
+            return FileUtils.readFileToString(new File(centos7RepoPath), StandardCharsets.UTF_8);
+        }
+        return IOUtils.toString(
+                Objects.requireNonNull(
+                        this.getClass()
+                                .getClassLoader()
+                                .getResourceAsStream("blackhole.army.knife/centos.7.aliyun.repo")
+                ));
     }
 }
