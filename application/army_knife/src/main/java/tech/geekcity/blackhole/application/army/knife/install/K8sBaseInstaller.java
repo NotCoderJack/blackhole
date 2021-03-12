@@ -90,6 +90,8 @@ public abstract class K8sBaseInstaller extends Installer implements Configurable
                 "setenforce 0",
                 "sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config",
                 "yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes",
+                "sed -i -Ee 's/^([^#][^ \\t]+ swap[ \\t]+ swap[ \\t].*)/#\\1/' /etc/fstab",
+                "swapoff -a",
                 "systemctl enable kubelet"
         ).forEach(super::runSingleCommand);
         if (start()) {

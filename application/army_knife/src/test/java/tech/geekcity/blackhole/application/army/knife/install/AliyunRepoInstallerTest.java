@@ -19,8 +19,6 @@ import java.util.Collections;
 import java.util.Objects;
 
 public class AliyunRepoInstallerTest extends AbstractSshClientTest {
-    private transient ByteArrayOutputStream stdout;
-    private transient ByteArrayOutputStream stderr;
     private transient SshConnector sshConnector;
     private transient String repoContent;
     private transient File centos7RepoFile;
@@ -28,15 +26,13 @@ public class AliyunRepoInstallerTest extends AbstractSshClientTest {
     @BeforeEach
     void setUp() throws IOException {
         super.configure();
-        stdout = new ByteArrayOutputStream();
-        stderr = new ByteArrayOutputStream();
         SshClientWrap rsaKeyPairWrap = super.sshClientWrap();
         sshConnector = SshConnector.Builder.newInstance()
                 .username(rsaKeyPairWrap.username())
                 .host(rsaKeyPairWrap.host())
                 .port(rsaKeyPairWrap.port())
-                .standardOutput(stdout)
-                .errorOutput(stderr)
+                .standardOutput(new ByteArrayOutputStream())
+                .errorOutput(new ByteArrayOutputStream())
                 .rsaKeyPairWrap(rsaKeyPairWrap.rsaKeyPairWrap())
                 .build();
         repoContent = originalRepoString() + "\n"

@@ -4,16 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.io.FileUtils;
 import org.inferred.freebuilder.FreeBuilder;
 import tech.geekcity.blackhole.application.army.knife.ssh.SshConnector;
 import tech.geekcity.blackhole.lib.core.Configurable;
 
 import javax.annotation.Nullable;
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 
 @FreeBuilder
 @JsonDeserialize(builder = DockerEngineInstaller.Builder.class)
@@ -61,6 +57,9 @@ public abstract class DockerEngineInstaller extends Installer implements Configu
     @Nullable
     public abstract String dockerCeRepoPath();
 
+    @Nullable
+    public abstract String dockerDaemonJsonPath();
+
     public abstract boolean start();
 
     @Override
@@ -79,6 +78,12 @@ public abstract class DockerEngineInstaller extends Installer implements Configu
                 ".repo",
                 dockerCeRepoString(),
                 "/etc/yum.repos.d/docker.ce.aliyun.repo");
+        super.runSingleCommand("mkdir -p /etc/docker");
+        super.createTempFileAndUpload(
+                "docker.daemon.ustc.",
+                ".json",
+                dockerDaemonJson(),
+                "/etc/docker/daemon.json");
         ImmutableList.of(
                 "yum install -y yum-utils device-mapper-persistent-data lvm2",
                 "yum makecache fast",
@@ -94,6 +99,13 @@ public abstract class DockerEngineInstaller extends Installer implements Configu
         return super.contentFromFileOrResource(
                 dockerCeRepoPath(),
                 "blackhole.army.knife/docker.ce.aliyun.repo"
+        );
+    }
+
+    private String dockerDaemonJson() throws IOException {
+        return super.contentFromFileOrResource(
+                dockerDaemonJsonPath(),
+                "blackhole.army.knife/docker.daemon.json"
         );
     }
 }

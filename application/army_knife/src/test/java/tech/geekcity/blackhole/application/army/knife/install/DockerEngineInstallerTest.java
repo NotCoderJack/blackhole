@@ -19,28 +19,26 @@ import java.util.Collections;
 import java.util.Objects;
 
 public class DockerEngineInstallerTest extends AbstractSshClientTest {
-    private transient ByteArrayOutputStream stdout;
-    private transient ByteArrayOutputStream stderr;
     private transient SshConnector sshConnector;
     private transient String repoContent;
+    private transient String dockerDaemonJson;
     private transient File dockerCeRepoFile;
 
     @BeforeEach
     void setUp() throws IOException {
         super.configure();
-        stdout = new ByteArrayOutputStream();
-        stderr = new ByteArrayOutputStream();
         SshClientWrap rsaKeyPairWrap = super.sshClientWrap();
         sshConnector = SshConnector.Builder.newInstance()
                 .username(rsaKeyPairWrap.username())
                 .host(rsaKeyPairWrap.host())
                 .port(rsaKeyPairWrap.port())
-                .standardOutput(stdout)
-                .errorOutput(stderr)
+                .standardOutput(new ByteArrayOutputStream())
+                .errorOutput(new ByteArrayOutputStream())
                 .rsaKeyPairWrap(rsaKeyPairWrap.rsaKeyPairWrap())
                 .build();
         repoContent = originalRepoString() + "\n"
                 + "# marked by blackhole " + RandomStringUtils.randomAlphanumeric(16) + "\n";
+        dockerDaemonJson = originalDockerDaemonJson();
         dockerCeRepoFile = File.createTempFile("docker.ce.aliyun.", ".repo");
         FileUtils.writeStringToFile(dockerCeRepoFile, repoContent, StandardCharsets.UTF_8);
     }
@@ -67,13 +65,20 @@ public class DockerEngineInstallerTest extends AbstractSshClientTest {
                 .build()) {
             installer.configure();
             installer.install();
-            File downloadedFile = File.createTempFile("downloaded.docker.ce.aliyun.", ".repo");
-            downloadedFile.delete();
+            File downloadedRepoFile = File.createTempFile("downloaded.docker.ce.aliyun.", ".repo");
+            downloadedRepoFile.delete();
             installer.simpleScp()
                     .download(
                             Collections.singletonList("/etc/yum.repos.d/docker.ce.aliyun.repo"),
-                            downloadedFile.getAbsolutePath());
-            Assertions.assertEquals(repoContent, FileUtils.readFileToString(downloadedFile, StandardCharsets.UTF_8));
+                            downloadedRepoFile.getAbsolutePath());
+            Assertions.assertEquals(repoContent, FileUtils.readFileToString(downloadedRepoFile, StandardCharsets.UTF_8));
+            File downloadedDockerDaemonJsonFile = File.createTempFile("downloaded.docker.daemon.json.", ".repo");
+            downloadedDockerDaemonJsonFile.delete();
+            installer.simpleScp()
+                    .download(
+                            Collections.singletonList("/etc/docker/daemon.json"),
+                            downloadedDockerDaemonJsonFile.getAbsolutePath());
+            Assertions.assertEquals(dockerDaemonJson, FileUtils.readFileToString(downloadedDockerDaemonJsonFile, StandardCharsets.UTF_8));
         }
     }
 
@@ -83,6 +88,15 @@ public class DockerEngineInstallerTest extends AbstractSshClientTest {
                         this.getClass()
                                 .getClassLoader()
                                 .getResourceAsStream("blackhole.army.knife/docker.ce.aliyun.repo")
+                ));
+    }
+
+    private String originalDockerDaemonJson() throws IOException {
+        return IOUtils.toString(
+                Objects.requireNonNull(
+                        this.getClass()
+                                .getClassLoader()
+                                .getResourceAsStream("blackhole.army.knife/docker.daemon.json")
                 ));
     }
 }
