@@ -9,19 +9,24 @@ bash setup_project.sh
 ```
 
 ### applications
-
-1. [sshd service](application/ssh): act as a springboard machine
-2. [nfs service](application/nfs): act as distributed storage
-3. [nfs storage provisioner](application/nfs_storage_provision): used to provide k8s volume automatically
-4. [maria db](application/maria_db): mysql service
-5. postgres
-6. rabbit mq
-7. redis
-8. zookeeper
-9. etcd
-10. kafka
-11. flink
-12. hdfs
-13. hbase
+1. [army_knife](application/army_knife): auto-setup base components, such as docker engine, K8S, glusterFS, NFS
+2. [sshd service](application/ssh): act as a springboard machine
+3. [nfs service](application/nfs): act as distributed storage
+4. [nfs storage provisioner](application/nfs_storage_provision): used to provide k8s volume automatically
+5. [maria db](application/maria_db): mysql service
+6. postgres
+7. rabbit mq
+8. redis
+9. zookeeper
+10. etcd
+11. kafka
+12. flink
+13. hdfs
+14. hbase
 
 ### libs
+1. [core](lib/core): base interfaces
+2. [docker](lib/docker): a lib to access local docker engine
+3. [render](lib/render): render template engine
+4. [ssh](lib/ssh): ssh utils including ssh_commander and simple_scp
+5. [agent](lib/agent): an agent based on grpc(developing...)
