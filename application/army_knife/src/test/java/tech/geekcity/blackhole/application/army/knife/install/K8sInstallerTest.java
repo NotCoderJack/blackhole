@@ -1,5 +1,6 @@
 package tech.geekcity.blackhole.application.army.knife.install;
 
+import com.google.common.base.Splitter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,13 +11,15 @@ import tech.geekcity.blackhole.application.army.knife.ssh.SshConnector;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class K8sInstallerTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(K8sInstallerTest.class);
     private transient boolean skip;
     private transient String masterHost;
     private transient SshConnector masterSshConnector;
-    private transient SshConnector workerSshConnector;
+    private transient List<SshConnector> workerSshConnectorList;
 
     @BeforeEach
     void setUp() throws IOException {
@@ -26,10 +29,10 @@ public class K8sInstallerTest {
         // ./gradlew :application:army_knife:test \
         //     --tests "tech.geekcity.blackhole.application.army.knife.install.K8sInstallerTest" \
         //     -Pblackhole.test.master_host=192.168.123.180
-        //     -Pblackhole.test.worker_host=192.168.123.181
+        //     -Pblackhole.test.worker_host.list=192.168.123.181,192.168.123.182
         masterHost = System.getProperty("blackhole.test.master_host", "");
         int masterPort = Integer.parseInt(System.getProperty("blackhole.test.master_port", "22"));
-        String workerHost = System.getProperty("blackhole.test.worker_host", "");
+        String workerHostList = System.getProperty("blackhole.test.worker_host.list", "");
         int workerPort = Integer.parseInt(System.getProperty("blackhole.test.worker_port", "22"));
         String username = System.getProperty("blackhole.test.username", "root");
         String password = System.getProperty("blackhole.test.password", "123456");
@@ -46,14 +49,19 @@ public class K8sInstallerTest {
                 .errorOutput(new ByteArrayOutputStream())
                 .password(password)
                 .build();
-        workerSshConnector = SshConnector.Builder.newInstance()
-                .username(username)
-                .host(workerHost)
-                .port(workerPort)
-                .standardOutput(new ByteArrayOutputStream())
-                .errorOutput(new ByteArrayOutputStream())
-                .password(password)
-                .build();
+        workerSshConnectorList = Splitter.on(",")
+                .omitEmptyStrings()
+                .splitToStream(workerHostList)
+                .distinct()
+                .map(workerHost -> SshConnector.Builder.newInstance()
+                        .username(username)
+                        .host(workerHost)
+                        .port(workerPort)
+                        .standardOutput(new ByteArrayOutputStream())
+                        .errorOutput(new ByteArrayOutputStream())
+                        .password(password)
+                        .build())
+                .collect(Collectors.toList());
     }
 
     @AfterEach
@@ -68,24 +76,38 @@ public class K8sInstallerTest {
         if (skip) {
             return;
         }
-        try (Installer installer = AliyunRepoInstaller.Builder.newInstance()
+        installBaseEnvironment(masterSshConnector);
+        try (K8sMasterInstaller masterInstaller = K8sMasterInstaller.Builder.newInstance()
                 .sshConnector(masterSshConnector)
+                .build()) {
+            masterInstaller.configure();
+            masterInstaller.install();
+            for (SshConnector workerSshConnector : workerSshConnectorList) {
+                installBaseEnvironment(workerSshConnector);
+                try (Installer workerInstaller = K8sWorkerInstaller.Builder.newInstance()
+                        .masterInstaller(masterInstaller)
+                        .sshConnector(workerSshConnector)
+                        .build()) {
+                    workerInstaller.configure();
+                    workerInstaller.install();
+                }
+            }
+        }
+        // TODO check one service
+    }
+
+    private void installBaseEnvironment(SshConnector workerSshConnector) throws IOException {
+        try (Installer installer = AliyunRepoInstaller.Builder.newInstance()
+                .sshConnector(workerSshConnector)
                 .build()) {
             installer.configure();
             installer.install();
         }
         try (Installer installer = DockerEngineInstaller.Builder.newInstance()
-                .sshConnector(masterSshConnector)
+                .sshConnector(workerSshConnector)
                 .build()) {
             installer.configure();
             installer.install();
         }
-        try (Installer installer = K8sMasterInstaller.Builder.newInstance()
-                .sshConnector(masterSshConnector)
-                .build()) {
-            installer.configure();
-            installer.install();
-        }
-        // TODO check one service
     }
 }

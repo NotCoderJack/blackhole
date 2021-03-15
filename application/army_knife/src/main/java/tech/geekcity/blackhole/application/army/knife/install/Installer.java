@@ -20,6 +20,7 @@ public abstract class Installer implements Configurable {
     private transient SshConnector sshConnector;
     private transient SshCommander sshCommander;
     private transient SimpleScp simpleScp;
+    private transient boolean installed;
 
     public abstract SshConnector sshConnector();
 
@@ -33,6 +34,7 @@ public abstract class Installer implements Configurable {
         sshCommander = sshConnector.validateSshCommander();
         simpleScp = sshConnector.validateSimpleScp();
         configured = true;
+        installed = false;
     }
 
     @Override
@@ -41,6 +43,9 @@ public abstract class Installer implements Configurable {
         if (null != sshConnector) {
             sshConnector.close();
             sshConnector = null;
+        }
+        if (installed) {
+            installed = false;
         }
         if (configured) {
             configured = false;
@@ -55,7 +60,19 @@ public abstract class Installer implements Configurable {
         return simpleScp;
     }
 
-    public abstract void install() throws IOException;
+    public void install() throws IOException {
+        if (installed) {
+            return;
+        }
+        doInstall();
+        installed = true;
+    }
+
+    public boolean installed() {
+        return installed;
+    }
+
+    protected abstract void doInstall() throws IOException;
 
     protected void runSingleCommand(String command) {
         try {

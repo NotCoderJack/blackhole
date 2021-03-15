@@ -69,7 +69,8 @@ public abstract class K8sBaseInstaller extends Installer implements Configurable
         super.close();
     }
 
-    public void install() throws IOException {
+    @Override
+    protected void doInstall() throws IOException {
         super.createTempFileAndUpload(
                 "modules.load.k8s.",
                 ".conf",

@@ -72,7 +72,8 @@ public abstract class DockerEngineInstaller extends Installer implements Configu
         super.close();
     }
 
-    public void install() throws IOException {
+    @Override
+    protected void doInstall() throws IOException {
         super.createTempFileAndUpload(
                 "docker.ce.aliyun.",
                 ".repo",

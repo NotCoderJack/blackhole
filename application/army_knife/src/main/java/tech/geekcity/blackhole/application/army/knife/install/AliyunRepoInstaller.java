@@ -62,7 +62,8 @@ public abstract class AliyunRepoInstaller extends Installer implements Configura
         super.close();
     }
 
-    public void install() throws IOException {
+    @Override
+    protected void doInstall() throws IOException {
         super.runSingleCommand("rm -rf /etc/yum.repos.d/*");
         super.createTempFileAndUpload(
                 "centos.7.aliyun.",
