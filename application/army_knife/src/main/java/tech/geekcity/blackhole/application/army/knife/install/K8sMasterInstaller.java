@@ -82,6 +82,18 @@ public abstract class K8sMasterInstaller extends Installer implements Configurab
                 calicoYamlString(),
                 "/root/calico.yaml");
         ImmutableList.of(
+                "firewall-cmd --permanent --add-port=6443/tcp",
+                "firewall-cmd --permanent --add-port=2379-2380/tcp",
+                "firewall-cmd --permanent --add-port=10250/tcp",
+                "firewall-cmd --permanent --add-port=10251/tcp",
+                "firewall-cmd --permanent --add-port=10252/tcp",
+                "firewall-cmd --permanent --add-port=10255/tcp",
+                "firewall-cmd --permanent --add-port=8472/udp",
+                "firewall-cmd --add-masquerade --permanent",
+                "firewall-cmd --permanent --add-port=30000-32767/tcp",
+                "firewall-cmd --reload"
+        ).forEach(super::runSingleCommand);
+        ImmutableList.of(
                 "kubeadm init --kubernetes-version=v1.20.2 --pod-network-cidr=172.21.0.0/20 --image-repository registry.aliyuncs.com/google_containers",
                 // TODO remove
                 "sed -i -Ee \"s/^([^#].*--port=0.*)/#\\1/g\" /etc/kubernetes/manifests/kube-scheduler.yaml",

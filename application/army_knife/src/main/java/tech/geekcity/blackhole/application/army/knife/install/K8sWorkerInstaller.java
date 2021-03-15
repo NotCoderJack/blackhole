@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.inferred.freebuilder.FreeBuilder;
@@ -107,6 +108,16 @@ public abstract class K8sWorkerInstaller extends Installer implements Configurab
     @Override
     protected void doInstall() throws IOException {
         k8sBaseInstaller.install();
+        ImmutableList.of(
+                "firewall-cmd --permanent --add-port=10250/tcp",
+                "firewall-cmd --permanent --add-port=10251/tcp",
+                "firewall-cmd --permanent --add-port=10252/tcp",
+                "firewall-cmd --permanent --add-port=10255/tcp",
+                "firewall-cmd --permanent --add-port=8472/udp",
+                "firewall-cmd --add-masquerade --permanent",
+                "firewall-cmd --permanent --add-port=30000-32767/tcp",
+                "firewall-cmd --reload"
+        ).forEach(super::runSingleCommand);
         super.runSingleCommand(
                 generateJoinCommandFromMaster(
                         chooseMasterSshConnector()));
