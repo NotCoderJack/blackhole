@@ -32,10 +32,6 @@ public abstract class K8sMasterInstaller extends Installer implements Configurab
             return new Builder();
         }
 
-        public Builder() {
-            start(true);
-        }
-
         public String toJson() throws JsonProcessingException {
             return objectMapper.writeValueAsString(build());
         }
@@ -56,8 +52,6 @@ public abstract class K8sMasterInstaller extends Installer implements Configurab
     @Override
     public abstract SshConnector sshConnector();
 
-    public abstract boolean start();
-
     @Nullable
     public abstract String calicoYamlPath();
 
@@ -66,7 +60,6 @@ public abstract class K8sMasterInstaller extends Installer implements Configurab
         super.configure();
         k8sBaseInstaller = K8sBaseInstaller.Builder.newInstance()
                 .sshConnector(sshConnector())
-                .start(start())
                 .build();
         k8sBaseInstaller.configure();
     }
@@ -80,7 +73,8 @@ public abstract class K8sMasterInstaller extends Installer implements Configurab
         super.close();
     }
 
-    public void install() throws IOException {
+    @Override
+    protected void doInstall() throws IOException {
         k8sBaseInstaller.install();
         super.createTempFileAndUpload(
                 "calico.",

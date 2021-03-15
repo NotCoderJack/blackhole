@@ -131,6 +131,7 @@ public abstract class SshConnector implements Configurable {
         }
         return sshCommander;
     }
+
     public SimpleScp validateSimpleScp() throws IOException {
         if (!validated) {
             validate();

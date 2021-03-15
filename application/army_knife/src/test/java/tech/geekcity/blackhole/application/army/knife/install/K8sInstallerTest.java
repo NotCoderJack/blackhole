@@ -86,6 +86,12 @@ public class K8sInstallerTest {
             installer.configure();
             installer.install();
         }
+        try (Installer installer = K8sWorkerInstaller.Builder.newInstance()
+                .sshConnector(workerSshConnector)
+                .build()) {
+            installer.configure();
+            installer.install();
+        }
         // TODO check one service
     }
 }
