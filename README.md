@@ -9,7 +9,11 @@ bash setup_project.sh
 ```
 
 ### applications
-1. [army_knife](application/army_knife): auto-setup base components, such as docker engine, K8S, glusterFS, NFS
+1. [army_knife](application/army_knife): auto-setup base components, such as 
+    * [docker engine](application/army_knife/src/test/java/tech/geekcity/blackhole/application/army/knife/install/DockerEngineInstallerTest.java)
+    * [kubernetes](application/army_knife/src/test/java/tech/geekcity/blackhole/application/army/knife/install/K8sInstallerTest.java)
+    * glusterFS
+    * NFS
 2. [sshd service](application/ssh): act as a springboard machine
 3. [nfs service](application/nfs): act as distributed storage
 4. [nfs storage provisioner](application/nfs_storage_provision): used to provide k8s volume automatically
