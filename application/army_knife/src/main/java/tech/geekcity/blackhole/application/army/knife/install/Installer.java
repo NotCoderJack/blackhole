@@ -1,9 +1,9 @@
 package tech.geekcity.blackhole.application.army.knife.install;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import tech.geekcity.blackhole.application.army.knife.ssh.SshConnector;
 import tech.geekcity.blackhole.lib.core.Configurable;
+import tech.geekcity.blackhole.lib.core.ResourceManager;
 import tech.geekcity.blackhole.lib.ssh.SimpleScp;
 import tech.geekcity.blackhole.lib.ssh.SshCommander;
 
@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.Objects;
 
 public abstract class Installer implements Configurable {
     private transient boolean configured = false;
@@ -98,15 +97,7 @@ public abstract class Installer implements Configurable {
             @Nullable String filePath,
             @Nonnull String resourcePath
     ) throws IOException {
-        if (null != filePath) {
-            return FileUtils.readFileToString(new File(filePath), StandardCharsets.UTF_8);
-        }
-        return IOUtils.toString(
-                Objects.requireNonNull(
-                        this.getClass()
-                                .getClassLoader()
-                                .getResourceAsStream(resourcePath)
-                ));
+        return ResourceManager.contentFromFileOrResource(this.getClass(), filePath, resourcePath);
     }
 
     protected void createTempFileAndUpload(

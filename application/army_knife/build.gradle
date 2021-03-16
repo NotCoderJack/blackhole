@@ -23,6 +23,7 @@ repositories.addAll(buildscript.repositories)
 dependencies {
     implementation(project(":lib:core"))
     implementation(project(":lib:render"))
+    implementation(project(":lib:docker"))
     implementation(project(":lib:ssh"))
     processor(project.rootProject.ext.jarDependency("org.inferred", "freebuilder"))
     implementation(project.rootProject.ext.jarDependency("com.google.guava", "guava"))
@@ -30,9 +31,11 @@ dependencies {
     implementation(project.rootProject.ext.jarDependency("org.freemarker", "freemarker"))
     implementation(project.rootProject.ext.jarDependency("org.apache.commons", "commons-lang3"))
     implementation(project.rootProject.ext.jarDependency("commons-io", "commons-io"))
+    implementation("org.springframework.boot:spring-boot-starter-web")
+
     testImplementation(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-api"))
     testRuntimeOnly(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-engine"))
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    testImplementation(project.rootProject.ext.jarDependency("com.github.docker-java", "docker-java-core"))
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude group: "org.junit.vintage", module: "junit-vintage-engine"
     }

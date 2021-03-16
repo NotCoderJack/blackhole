@@ -1,4 +1,4 @@
-package tech.geekcity.blackhole.lib.docker.image;
+package tech.geekcity.blackhole.application.army.knife.image;
 
 import com.github.dockerjava.api.model.Image;
 import org.junit.jupiter.api.AfterEach;
@@ -10,7 +10,7 @@ import tech.geekcity.blackhole.lib.docker.util.DockerUtil;
 
 import java.io.IOException;
 
-public class CentOsBaseTest {
+public class FlintImageTest {
     private transient DockerProxy dockerProxy;
 
     @BeforeEach
@@ -28,12 +28,12 @@ public class CentOsBaseTest {
     @Test
     void testBuild() throws IOException {
         final String tag = "v_test_1.0";
-        try (CentOsBase centOsBase = CentOsBase.Builder.newInstance()
+        try (FlintImage flintImage = FlintImage.Builder.newInstance()
                 .tag(tag)
                 .build()) {
-            centOsBase.configure();
-            String imageId = centOsBase.buildImage();
-            Image image = dockerProxy.findImageByName(CentOsBase.IMAGE_NAME, tag);
+            flintImage.configure();
+            String imageId = flintImage.buildImage();
+            Image image = dockerProxy.findImageByName(FlintImage.IMAGE_NAME, tag);
             Assertions.assertNotNull(image);
             Assertions.assertTrue(
                     image.getId()
