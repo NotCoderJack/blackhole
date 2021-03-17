@@ -1,4 +1,3 @@
-# kubectl create secret generic kube-config --from-file=kube_config/
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,23 +16,26 @@ spec:
     spec:
       restartPolicy: Always
       volumes:
-        - name: flint-conf-storage
-          configMap:
-            name: ${config_map_name}
-        - name: data-storage
-          persistentVolumeClaim:
-            claimName: ${nfs_pvc_name}
+        - name: kube-config-volume
+          secret:
+            secretName: kube-config
+      nodeSelector:
+        flint: true
+      tolerations:
+        - key: "node-role.kubernetes.io/master"
+          operator: "Equal"
+          value: ""
+          effect: "NoSchedule"
       containers:
         - name: flint
           image: ${flint_image_name}
           volumeMounts:
-            - mountPath: /etc/mysql/my.cnf
-              name: flint-conf-storage
-              subPath: my.cnf
-            - mountPath: /var/lib/mysql
-              name: data-storage
+            - mountPath: /root/.kube/config
+              name: kube-config-volume
+              subPath: config
+              readOnly: true
           ports:
-            - containerPort: 80
+            - containerPort: 8080
               protocol: TCP
           resources:
             limits:
@@ -52,7 +54,7 @@ spec:
     - name: client
       port: 80
       protocol: TCP
-      targetPort: 80
+      targetPort: 8080
       nodePort: 30080
   selector:
     app: flint

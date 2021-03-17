@@ -37,19 +37,6 @@ public abstract class K8sWorkerInstaller extends Installer implements Configurab
             return new Builder();
         }
 
-        @Override
-        public K8sWorkerInstaller build() {
-            if (null == masterSshConnector()) {
-                K8sMasterInstaller masterInstaller = masterInstaller();
-                Preconditions.checkArgument(
-                        null != masterInstaller,
-                        "masterSshConnector and masterInstaller cannot both be null"
-                );
-                masterSshConnector(masterInstaller.sshConnector());
-            }
-            return super.build();
-        }
-
         public String toJson() throws JsonProcessingException {
             return objectMapper.writeValueAsString(build());
         }

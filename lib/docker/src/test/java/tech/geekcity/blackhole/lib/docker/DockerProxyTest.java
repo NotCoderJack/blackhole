@@ -2,6 +2,7 @@ package tech.geekcity.blackhole.lib.docker;
 
 import com.github.dockerjava.api.model.Image;
 import com.google.common.collect.ImmutableList;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -14,9 +15,11 @@ import tech.geekcity.blackhole.lib.docker.util.DockerUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 
 public class DockerProxyTest {
@@ -85,5 +88,18 @@ public class DockerProxyTest {
         Assertions.assertEquals(content, stdout.toString());
         Assertions.assertEquals("", stderr.toString());
         dockerProxy.stopContainer(containerName);
+    }
+
+    @Test
+    public void testSaveImage() throws IOException {
+        File dockerImageFile = File.createTempFile("hello-world.linux.", ".dim");
+        dockerProxy.saveImage("hello-world:linux", dockerImageFile);
+        dockerImageFile.deleteOnExit();
+        try (InputStream inputStream = Files.newInputStream(Paths.get(dockerImageFile.toURI()))) {
+            Assertions.assertEquals(
+                    "abbe34ec47fe36f4a10b6748a171eca2",
+                    DigestUtils.md5Hex(inputStream)
+            );
+        }
     }
 }

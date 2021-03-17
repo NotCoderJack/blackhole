@@ -56,6 +56,9 @@ test {
             "blackhole.army.knife.springboot.package.path",
             bootJar.archiveFile.get().asFile.getAbsolutePath()
     )
+    if (!bootJar.archiveFile.get().asFile.exists()) {
+        bootJar.archiveFile.get().asFile.createNewFile();
+    }
 }
 
 task runJar(type: Exec) {
