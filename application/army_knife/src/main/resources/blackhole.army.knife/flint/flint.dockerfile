@@ -15,6 +15,9 @@ RUN rm -rf /etc/yum.repos.d/* \
     && curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo
 ADD centos.7.aliyun.repo /etc/yum.repos.d/centos.7.aliyun.repo
 ADD kubernetes.aliyun.repo /etc/yum.repos.d/kubernetes.aliyun.repo
+ADD army_knife.jar /opt/blackhole/army_knife.jar
 RUN set -x \
     && yum install -y kubectl java-1.8.0-openjdk-devel --disableexcludes=kubernetes
 ENV JAVA_HOME=/usr/lib/jvm/java
+
+CMD ["java", "-jar", "/opt/blackhole/army_knife.jar"]

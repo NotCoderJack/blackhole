@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Objects;
 
 @FreeBuilder
 @JsonDeserialize(builder = FlintImage.Builder.class)
@@ -39,6 +40,12 @@ public abstract class FlintImage implements Configurable {
             return new Builder();
         }
 
+        public Builder() {
+            springBootPackagePath(
+                    Objects.requireNonNull(
+                            System.getProperty("blackhole.army.knife.springboot.package.path")));
+        }
+
         public String toJson() throws JsonProcessingException {
             return objectMapper.writeValueAsString(build());
         }
@@ -57,6 +64,8 @@ public abstract class FlintImage implements Configurable {
     }
 
     public abstract String tag();
+
+    public abstract String springBootPackagePath();
 
     @Override
     public void configure() throws IOException {
@@ -80,6 +89,10 @@ public abstract class FlintImage implements Configurable {
                 ResourceManager.contentFromResource(
                         this.getClass(), "blackhole.army.knife/kubernetes.aliyun.repo"),
                 StandardCharsets.UTF_8);
+        FileUtils.copyFile(
+                new File(springBootPackagePath()),
+                new File(String.format("%s/army_knife.jar", buildDirectory.getAbsolutePath()))
+        );
     }
 
     @Override
