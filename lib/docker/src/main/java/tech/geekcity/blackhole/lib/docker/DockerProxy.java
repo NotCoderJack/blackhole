@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.*;
+import com.github.dockerjava.api.exception.DockerClientException;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
@@ -13,6 +14,7 @@ import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
 import com.google.common.base.Preconditions;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.inferred.freebuilder.FreeBuilder;
 import tech.geekcity.blackhole.lib.core.Configurable;
@@ -106,6 +108,23 @@ public abstract class DockerProxy implements Configurable {
                 .withBaseDirectory(null != baseDirectory ? baseDirectory : dockerFile.getParentFile())
                 .withDockerfile(dockerFile);
         return buildImageCmd.exec(new BuildImageResultCallback()).awaitImageId();
+    }
+
+    public void pullImage(String imageNameWithTag) {
+        try {
+            dockerClient.pullImageCmd(imageNameWithTag)
+                    .exec(new PullImageResultCallback())
+                    .awaitCompletion();
+        } catch (InterruptedException e) {
+            throw new DockerClientException(String.format("pull image failed: %s", e.getMessage()), e);
+        }
+    }
+
+    public void saveImage(String imageNameWithTag, File targetFile) throws IOException {
+        FileUtils.copyInputStreamToFile(
+                dockerClient.saveImageCmd(imageNameWithTag)
+                        .exec(),
+                targetFile);
     }
 
     public Image findImageByRepoTag(String expectedRepoTag) {

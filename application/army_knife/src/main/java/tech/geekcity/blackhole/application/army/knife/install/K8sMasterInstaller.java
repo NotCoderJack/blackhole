@@ -103,6 +103,8 @@ public abstract class K8sMasterInstaller extends Installer implements Configurab
                 "mkdir -p $HOME/.kube",
                 "cp /etc/kubernetes/admin.conf $HOME/.kube/config",
                 "chown $(id -u):$(id -g) $HOME/.kube/config",
+                "kubectl create namespace blackhole",
+                "kubectl -n blackhole create secret generic kube-config --from-file=.kube/",
                 "kubectl apply -f /root/calico.yaml"
         ).forEach(super::runSingleCommand);
     }

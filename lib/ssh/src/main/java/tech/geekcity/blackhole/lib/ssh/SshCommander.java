@@ -76,6 +76,25 @@ public abstract class SshCommander implements Configurable {
         }
     }
 
+    public void runAndCheckReturn(String command) throws IOException {
+        runAndCheckReturn(command, 0);
+    }
+
+    public void runAndCheckReturn(String command, int expectedExitValue) throws IOException {
+        int actualExitValue = run(command);
+        if (expectedExitValue != actualExitValue) {
+            throw runCommandErrorException(
+                    command,
+                    sshClientWrap().host(),
+                    sshClientWrap().port(),
+                    new IOException(String.format(
+                            "expectedExitValue(%s) != actualExitValue(%s)", expectedExitValue, actualExitValue)),
+                    standardOutput().toString(),
+                    errorOutput().toString()
+            );
+        }
+    }
+
     public int run(String command) throws IOException {
         return run(command, -1L);
     }
@@ -89,5 +108,23 @@ public abstract class SshCommander implements Configurable {
             channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), timeoutInMilliseconds);
             return channel.getExitStatus();
         }
+    }
+
+    private RuntimeException runCommandErrorException(
+            String command,
+            String host,
+            int port,
+            Exception cause,
+            String standardOutput,
+            String errorOutput) {
+        return new RuntimeException(
+                String.format("run command(%s) at %s:%s failed: %s %s %s",
+                        command,
+                        host,
+                        port,
+                        cause.getMessage(),
+                        standardOutput,
+                        errorOutput,
+                        cause));
     }
 }

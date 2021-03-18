@@ -9,9 +9,12 @@ bash setup_project.sh
 ```
 
 ### applications
-1. [army_knife](application/army_knife): auto-setup base components, such as 
+
+1. [army_knife](application/army_knife): auto-setup base components, such as
     * [docker engine](application/army_knife/src/test/java/tech/geekcity/blackhole/application/army/knife/install/DockerEngineInstallerTest.java)
-    * [kubernetes](application/army_knife/src/test/java/tech/geekcity/blackhole/application/army/knife/install/K8sInstallerTest.java)
+    * [kubernetes](application/army_knife/src/test/java/tech/geekcity/blackhole/application/army/knife/install/K8sClusterInstallerTest.java)
+    * [flint](application/army_knife/src/test/java/tech/geekcity/blackhole/application/army/knife/install/flint/FlintInstallerTest.java):
+      a service containing army_knife web jar
     * glusterFS
     * NFS
 2. [sshd service](application/ssh): act as a springboard machine
@@ -29,6 +32,7 @@ bash setup_project.sh
 14. hbase
 
 ### libs
+
 1. [core](lib/core): base interfaces
 2. [docker](lib/docker): a lib to access local docker engine
 3. [render](lib/render): render template engine

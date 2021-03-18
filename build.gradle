@@ -49,6 +49,7 @@ ext {
         def dockerJavaVersion = "3.2.7"
         def junitJupiterVersion = "5.3.1"
         def minaSshVersion = "2.5.1"
+        def logbackVersion = "1.2.3"
         versionMapping = [
                 "org.inferred:freebuilder"                                : "2.6.1",
                 "com.google.code.findbugs:jsr305"                         : "3.0.2",
@@ -65,6 +66,8 @@ ext {
                 "com.fasterxml.jackson.core:jackson-core"                 : jacksonVersion,
                 "com.fasterxml.jackson.core:jackson-databind"             : jacksonVersion,
                 "com.fasterxml.jackson.core:jackson-annotations"          : jacksonVersion,
+                "ch.qos.logback:logback-core"                             : logbackVersion,
+                "ch.qos.logback:logback-classic"                          : logbackVersion,
                 "io.grpc:grpc-api"                                        : grpcVersion,
                 "io.grpc:grpc-core"                                       : grpcVersion,
                 "io.grpc:grpc-netty-shaded"                               : grpcVersion,

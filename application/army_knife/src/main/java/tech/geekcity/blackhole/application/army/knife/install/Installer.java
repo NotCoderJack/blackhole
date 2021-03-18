@@ -1,9 +1,9 @@
 package tech.geekcity.blackhole.application.army.knife.install;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import tech.geekcity.blackhole.application.army.knife.ssh.SshConnector;
 import tech.geekcity.blackhole.lib.core.Configurable;
+import tech.geekcity.blackhole.lib.core.ResourceManager;
 import tech.geekcity.blackhole.lib.ssh.SimpleScp;
 import tech.geekcity.blackhole.lib.ssh.SshCommander;
 
@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.Objects;
 
 public abstract class Installer implements Configurable {
     private transient boolean configured = false;
@@ -76,21 +75,9 @@ public abstract class Installer implements Configurable {
 
     protected void runSingleCommand(String command) {
         try {
-            int returnCode = sshCommander.run(command);
-            if (0 != returnCode) {
-                throw runCommandErrorException(
-                        command,
-                        new IOException(String.format("returnCode(%s) != 0", returnCode)),
-                        sshCommander.standardOutput().toString(),
-                        sshCommander.errorOutput().toString()
-                );
-            }
+            sshCommander.runAndCheckReturn(command, 0);
         } catch (IOException e) {
-            throw runCommandErrorException(
-                    command,
-                    e,
-                    sshCommander.standardOutput().toString(),
-                    sshCommander.errorOutput().toString());
+            throw new RuntimeException(e);
         }
     }
 
@@ -98,15 +85,7 @@ public abstract class Installer implements Configurable {
             @Nullable String filePath,
             @Nonnull String resourcePath
     ) throws IOException {
-        if (null != filePath) {
-            return FileUtils.readFileToString(new File(filePath), StandardCharsets.UTF_8);
-        }
-        return IOUtils.toString(
-                Objects.requireNonNull(
-                        this.getClass()
-                                .getClassLoader()
-                                .getResourceAsStream(resourcePath)
-                ));
+        return ResourceManager.contentFromFileOrResource(this.getClass(), filePath, resourcePath);
     }
 
     protected void createTempFileAndUpload(
@@ -122,19 +101,5 @@ public abstract class Installer implements Configurable {
                         dockerCeRepoFile.getAbsolutePath()),
                 uploadTarget);
         dockerCeRepoFile.delete();
-    }
-
-    private RuntimeException runCommandErrorException(
-            String command,
-            Exception cause,
-            String standardOutput,
-            String errorOutput) {
-        return new RuntimeException(
-                String.format("run command(%s) failed: %s %s %s",
-                        command,
-                        cause.getMessage(),
-                        standardOutput,
-                        errorOutput,
-                        cause));
     }
 }

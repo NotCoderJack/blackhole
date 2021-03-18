@@ -23,6 +23,7 @@ repositories.addAll(buildscript.repositories)
 dependencies {
     implementation(project(":lib:core"))
     implementation(project(":lib:render"))
+    implementation(project(":lib:docker"))
     implementation(project(":lib:ssh"))
     processor(project.rootProject.ext.jarDependency("org.inferred", "freebuilder"))
     implementation(project.rootProject.ext.jarDependency("com.google.guava", "guava"))
@@ -30,9 +31,13 @@ dependencies {
     implementation(project.rootProject.ext.jarDependency("org.freemarker", "freemarker"))
     implementation(project.rootProject.ext.jarDependency("org.apache.commons", "commons-lang3"))
     implementation(project.rootProject.ext.jarDependency("commons-io", "commons-io"))
+    implementation(project.rootProject.ext.jarDependency("ch.qos.logback", "logback-core"))
+    implementation(project.rootProject.ext.jarDependency("ch.qos.logback", "logback-classic"))
+    implementation("org.springframework.boot:spring-boot-starter-web")
+
     testImplementation(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-api"))
     testRuntimeOnly(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-engine"))
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    testImplementation(project.rootProject.ext.jarDependency("com.github.docker-java", "docker-java-core"))
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude group: "org.junit.vintage", module: "junit-vintage-engine"
     }
@@ -40,12 +45,24 @@ dependencies {
 
 test {
     useJUnitPlatform()
-    systemProperty "blackhole.test.master_host", project.getProperties().getOrDefault("blackhole.test.master_host", null)
-    systemProperty "blackhole.test.master_port", project.getProperties().getOrDefault("blackhole.test.master_port", 22)
-    systemProperty "blackhole.test.worker_host.list", project.getProperties().getOrDefault("blackhole.test.worker_host.list", null)
-    systemProperty "blackhole.test.worker_port", project.getProperties().getOrDefault("blackhole.test.worker_port", 22)
-    systemProperty "blackhole.test.username", project.getProperties().getOrDefault("blackhole.test.username", "root")
-    systemProperty "blackhole.test.password", project.getProperties().getOrDefault("blackhole.test.password", "123456")
+    def setSystemPropertyByProjectProperty = { String name, String defaultValue ->
+        systemProperty(name, project.getProperties().getOrDefault(name, defaultValue))
+    }
+    setSystemPropertyByProjectProperty("blackhole.test.master_host", null)
+    setSystemPropertyByProjectProperty("blackhole.test.master_port", "22")
+    setSystemPropertyByProjectProperty("blackhole.test.worker_host.list", null)
+    setSystemPropertyByProjectProperty("blackhole.test.worker_port", "22")
+    setSystemPropertyByProjectProperty("blackhole.test.username", "root")
+    setSystemPropertyByProjectProperty("blackhole.test.password", "123456")
+    setSystemPropertyByProjectProperty(
+            "blackhole.army.knife.springboot.package.path",
+            bootJar.archiveFile.get().asFile.getAbsolutePath()
+    )
+    def bootJarFile = bootJar.archiveFile.get().asFile
+    if (!bootJarFile.exists()) {
+        bootJarFile.parentFile.mkdirs()
+        bootJarFile.createNewFile()
+    }
 }
 
 task runJar(type: Exec) {

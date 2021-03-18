@@ -36,7 +36,7 @@ public class AliyunRepoInstallerTest extends AbstractSshClientTest {
                 .rsaKeyPairWrap(rsaKeyPairWrap.rsaKeyPairWrap())
                 .build();
         repoContent = originalRepoString() + "\n"
-                + "# marked by blackhole " + RandomStringUtils.randomAlphanumeric(16) + "\n";
+                + "# marked by blackhole " + RandomStringUtils.randomAlphanumeric(16);
         centos7RepoFile = File.createTempFile("centos.7.aliyun.", ".repo");
         FileUtils.writeStringToFile(centos7RepoFile, repoContent, StandardCharsets.UTF_8);
     }

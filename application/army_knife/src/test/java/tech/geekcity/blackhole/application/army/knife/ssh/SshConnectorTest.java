@@ -1,6 +1,5 @@
 package tech.geekcity.blackhole.application.army.knife.ssh;
 
-import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -34,11 +33,7 @@ public class SshConnectorTest extends AbstractSshClientTest {
                 .build();
         sshCommander.configure();
         LOGGER.debug("password: %s", PASSWORD);
-        int returnCode = sshCommander.run(String.format("echo '%s\n%s' | passwd", PASSWORD, PASSWORD));
-        Preconditions.checkArgument(
-                0 == returnCode,
-                "run command failed: %s %s",
-                stdout.toString(), stderr.toString());
+        sshCommander.runAndCheckReturn(String.format("echo '%s\n%s' | passwd", PASSWORD, PASSWORD));
     }
 
     @AfterEach
