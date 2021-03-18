@@ -31,6 +31,8 @@ dependencies {
     implementation(project.rootProject.ext.jarDependency("org.freemarker", "freemarker"))
     implementation(project.rootProject.ext.jarDependency("org.apache.commons", "commons-lang3"))
     implementation(project.rootProject.ext.jarDependency("commons-io", "commons-io"))
+    implementation(project.rootProject.ext.jarDependency("ch.qos.logback", "logback-core"))
+    implementation(project.rootProject.ext.jarDependency("ch.qos.logback", "logback-classic"))
     implementation("org.springframework.boot:spring-boot-starter-web")
 
     testImplementation(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-api"))
@@ -56,8 +58,10 @@ test {
             "blackhole.army.knife.springboot.package.path",
             bootJar.archiveFile.get().asFile.getAbsolutePath()
     )
-    if (!bootJar.archiveFile.get().asFile.exists()) {
-        bootJar.archiveFile.get().asFile.createNewFile();
+    def bootJarFile = bootJar.archiveFile.get().asFile
+    if (!bootJarFile.exists()) {
+        bootJarFile.parentFile.mkdirs()
+        bootJarFile.createNewFile()
     }
 }
 

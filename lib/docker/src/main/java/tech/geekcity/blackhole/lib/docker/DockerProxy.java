@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.*;
+import com.github.dockerjava.api.exception.DockerClientException;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
@@ -107,6 +108,16 @@ public abstract class DockerProxy implements Configurable {
                 .withBaseDirectory(null != baseDirectory ? baseDirectory : dockerFile.getParentFile())
                 .withDockerfile(dockerFile);
         return buildImageCmd.exec(new BuildImageResultCallback()).awaitImageId();
+    }
+
+    public void pullImage(String imageNameWithTag) {
+        try {
+            dockerClient.pullImageCmd(imageNameWithTag)
+                    .exec(new PullImageResultCallback())
+                    .awaitCompletion();
+        } catch (InterruptedException e) {
+            throw new DockerClientException(String.format("pull image failed: %s", e.getMessage()), e);
+        }
     }
 
     public void saveImage(String imageNameWithTag, File targetFile) throws IOException {

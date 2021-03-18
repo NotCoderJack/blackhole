@@ -75,21 +75,9 @@ public abstract class Installer implements Configurable {
 
     protected void runSingleCommand(String command) {
         try {
-            int returnCode = sshCommander.run(command);
-            if (0 != returnCode) {
-                throw runCommandErrorException(
-                        command,
-                        new IOException(String.format("returnCode(%s) != 0", returnCode)),
-                        sshCommander.standardOutput().toString(),
-                        sshCommander.errorOutput().toString()
-                );
-            }
+            sshCommander.runAndCheckReturn(command, 0);
         } catch (IOException e) {
-            throw runCommandErrorException(
-                    command,
-                    e,
-                    sshCommander.standardOutput().toString(),
-                    sshCommander.errorOutput().toString());
+            throw new RuntimeException(e);
         }
     }
 
@@ -113,19 +101,5 @@ public abstract class Installer implements Configurable {
                         dockerCeRepoFile.getAbsolutePath()),
                 uploadTarget);
         dockerCeRepoFile.delete();
-    }
-
-    private RuntimeException runCommandErrorException(
-            String command,
-            Exception cause,
-            String standardOutput,
-            String errorOutput) {
-        return new RuntimeException(
-                String.format("run command(%s) failed: %s %s %s",
-                        command,
-                        cause.getMessage(),
-                        standardOutput,
-                        errorOutput,
-                        cause));
     }
 }

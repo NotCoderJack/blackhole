@@ -33,7 +33,7 @@ public class SshCommanderTest extends AbstractSshClientTest {
 
     @Test
     void testRun() throws IOException {
-        sshCommander.run("cat /root/.ssh/authorized_keys");
+        sshCommander.runAndCheckReturn("cat /root/.ssh/authorized_keys");
         Assertions.assertEquals(super.publicKey(), stdout.toString());
         Assertions.assertEquals("", stderr.toString());
     }

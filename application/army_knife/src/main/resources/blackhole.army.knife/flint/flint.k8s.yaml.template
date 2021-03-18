@@ -19,13 +19,6 @@ spec:
         - name: kube-config-volume
           secret:
             secretName: kube-config
-      nodeSelector:
-        flint: true
-      tolerations:
-        - key: "node-role.kubernetes.io/master"
-          operator: "Equal"
-          value: ""
-          effect: "NoSchedule"
       containers:
         - name: flint
           image: ${flint_image_name}

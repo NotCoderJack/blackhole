@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
@@ -52,16 +51,16 @@ public class DockerProxyTest {
                                 .getResourceAsStream("build_image.dockerfile")),
                 StandardCharsets.UTF_8);
         LoggerFactory.getLogger(getClass()).debug(content);
-        Path dockerFile = Files.createTempFile("build_image.", ".dockerfile");
-        dockerFile.toFile().deleteOnExit();
-        FileUtils.writeStringToFile(dockerFile.toFile(), content, StandardCharsets.UTF_8);
-//        Path dockerDirectory = Files.createTempDirectory("docker");
-        FileUtils.copyFile(dockerFile.toFile(),
+        File buildDirectory = Files.createTempDirectory("docker.build.").toFile();
+        File dockerFile = File.createTempFile("build_image.", ".dockerfile", buildDirectory);
+        dockerFile.deleteOnExit();
+        FileUtils.writeStringToFile(dockerFile, content, StandardCharsets.UTF_8);
+        FileUtils.copyFile(dockerFile,
                 new File(String.format(
                         "%s/build_image.dockerfile",
-                        dockerFile.toFile().getParentFile().getAbsolutePath())));
+                        dockerFile.getParentFile().getAbsolutePath())));
         String imageId = dockerProxy.buildImage(
-                dockerFile.toFile(),
+                dockerFile,
                 // TODO see implementation of buildImage: baseDirectory bug
                 null,
                 IMAGE_NAME,
@@ -71,7 +70,7 @@ public class DockerProxyTest {
         Assertions.assertTrue(
                 image.getId()
                         .startsWith(DockerUtil.wrapIdWithSha256(imageId)));
-//        FileUtils.deleteDirectory(dockerDirectory.toFile());
+        FileUtils.deleteDirectory(buildDirectory);
         String containerName = "test_container";
         dockerProxy.startContainer(
                 String.format("%s:%s", IMAGE_NAME, IMAGE_TAG),
@@ -91,11 +90,14 @@ public class DockerProxyTest {
     }
 
     @Test
-    public void testSaveImage() throws IOException {
+    public void testPullAndSaveImage() throws IOException {
+        String imageNameWithTag = "hello-world:linux";
+        dockerProxy.pullImage(imageNameWithTag);
         File dockerImageFile = File.createTempFile("hello-world.linux.", ".dim");
-        dockerProxy.saveImage("hello-world:linux", dockerImageFile);
+        dockerProxy.saveImage(imageNameWithTag, dockerImageFile);
         dockerImageFile.deleteOnExit();
         try (InputStream inputStream = Files.newInputStream(Paths.get(dockerImageFile.toURI()))) {
+            // NOTE: may change in the future
             Assertions.assertEquals(
                     "abbe34ec47fe36f4a10b6748a171eca2",
                     DigestUtils.md5Hex(inputStream)

@@ -133,13 +133,13 @@ public abstract class K8sWorkerInstaller extends Installer implements Configurab
                 "/tmp/join_command_%s.txt",
                 RandomStringUtils.randomAlphanumeric(8));
         masterSshConnectorToUse.validateSshCommander()
-                .run(String.format("kubeadm token create --print-join-command > %s", remoteTempFilePath));
+                .runAndCheckReturn(String.format("kubeadm token create --print-join-command > %s", remoteTempFilePath));
         File localTempFile = File.createTempFile("join_command.", ".txt");
         localTempFile.delete();
         masterSshConnectorToUse.validateSimpleScp()
                 .download(Collections.singletonList(remoteTempFilePath), localTempFile.getAbsolutePath());
         masterSshConnectorToUse.validateSshCommander()
-                .run(String.format("rm -f %s", remoteTempFilePath));
+                .runAndCheckReturn(String.format("rm -f %s", remoteTempFilePath));
         String joinCommand = FileUtils.readFileToString(localTempFile);
         localTempFile.delete();
         return joinCommand;

@@ -37,7 +37,7 @@ public class DockerEngineInstallerTest extends AbstractSshClientTest {
                 .rsaKeyPairWrap(rsaKeyPairWrap.rsaKeyPairWrap())
                 .build();
         repoContent = originalRepoString() + "\n"
-                + "# marked by blackhole " + RandomStringUtils.randomAlphanumeric(16) + "\n";
+                + "# marked by blackhole " + RandomStringUtils.randomAlphanumeric(16);
         dockerDaemonJson = originalDockerDaemonJson();
         dockerCeRepoFile = File.createTempFile("docker.ce.aliyun.", ".repo");
         FileUtils.writeStringToFile(dockerCeRepoFile, repoContent, StandardCharsets.UTF_8);

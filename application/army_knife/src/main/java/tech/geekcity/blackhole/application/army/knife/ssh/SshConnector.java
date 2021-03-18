@@ -128,6 +128,7 @@ public abstract class SshConnector implements Configurable {
     public SshCommander validateSshCommander() throws IOException {
         if (!validated) {
             validate();
+            validated = true;
         }
         return sshCommander;
     }
@@ -135,6 +136,7 @@ public abstract class SshConnector implements Configurable {
     public SimpleScp validateSimpleScp() throws IOException {
         if (!validated) {
             validate();
+            validated = true;
         }
         return simpleScp;
     }
@@ -156,18 +158,12 @@ public abstract class SshConnector implements Configurable {
                 .build();
         sshCommander.configure();
         simpleScp.configure();
-        int returnCode = sshCommander.run("cat /etc/redhat-release");
-        if (returnCode != 0) {
-            throw new IOException(String.format(
-                    "validate failed: %s %s",
-                    standardOutput().toString(),
-                    errorOutput().toString()));
-        }
+        sshCommander.runAndCheckReturn("cat /etc/redhat-release");
         File tempFile = File.createTempFile("readhat-release.", ".tmp");
         tempFile.delete();
         simpleScp.download(Collections.singletonList("/etc/redhat-release"), tempFile.getAbsolutePath());
         tempFile.delete();
-        LOGGER.info("validation succeed: {} {}", standardOutput().toString(), errorOutput().toString());
+        LOGGER.info("validation for succeed: {} {}", standardOutput().toString(), errorOutput().toString());
     }
 
     private void copyPublicKey(
@@ -190,12 +186,8 @@ public abstract class SshConnector implements Configurable {
                 .errorOutput(stderr)
                 .build()) {
             sshCommander.configure();
-            int returnCode = sshCommander.run(String.format(
+            sshCommander.runAndCheckReturn(String.format(
                     "echo '%s' >> $HOME/.ssh/authorized_keys", publicKeyAsStringToWrite));
-            if (0 != returnCode) {
-                throw new IOException(String.format(
-                        "copy public key failed: %s %s", stdout.toString(), stderr.toString()));
-            }
         }
     }
 }
