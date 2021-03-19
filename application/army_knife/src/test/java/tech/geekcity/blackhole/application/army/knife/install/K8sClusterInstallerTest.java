@@ -26,14 +26,14 @@ public class K8sClusterInstallerTest {
     @BeforeEach
     void setUp() throws IOException {
         // prepare machines first
-        // virtual machine is a nice option
+        // virtual machine is a nice option: reference to external/create_vm_with_virtualbox.md
         // note: the number of available CPUs should be 2 at least
         // NOTE: run the command below first because we need a valid jar of flint
         // ./gradlew --info :application:army_knife:bootJar
         // ./gradlew :application:army_knife:test \
         //     --tests "tech.geekcity.blackhole.application.army.knife.install.K8sClusterInstallerTest" \
-        //     -Pblackhole.test.master_host=192.168.123.180
-        //     -Pblackhole.test.worker_host.list=192.168.123.181,192.168.123.182
+        //     -Pblackhole.test.master_host=master-k8s
+        //     -Pblackhole.test.worker_host.list=worker1-k8s,worker2-k8s
         masterHost = System.getProperty("blackhole.test.master_host", "");
         int masterPort = Integer.parseInt(System.getProperty("blackhole.test.master_port", "22"));
         String workerHostList = System.getProperty("blackhole.test.worker_host.list", "");
