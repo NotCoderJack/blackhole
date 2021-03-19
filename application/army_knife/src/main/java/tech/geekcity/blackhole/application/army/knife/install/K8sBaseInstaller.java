@@ -104,6 +104,37 @@ public abstract class K8sBaseInstaller extends Installer implements Configurable
         for (Map.Entry<String, String> entry : imageMeta.entrySet()) {
             pullImageAndLoadAtRemote(entry.getKey(), targetPath, entry.getValue());
         }
+        LOGGER.info("setting firewall...");
+        ImmutableList.of(
+                // Calico networking (BGP)
+                "firewall-cmd --permanent --add-port=179/tcp",
+                // etcd datastore
+                "firewall-cmd --permanent --add-port=2379-2380/tcp",
+                // Default cAdvisor port used to query container metrics
+                "firewall-cmd --permanent --add-port=4149/tcp",
+                // Calico networking with VXLAN enabled
+                "firewall-cmd --permanent --add-port=4789/udp",
+                // Calico networking with Typha enabled
+                "firewall-cmd --permanent --add-port=5473/tcp",
+                // Kubernetes API port
+                "firewall-cmd --permanent --add-port=6443/tcp",
+                // Health check server for Calico (if using Calico/Canal)
+                "firewall-cmd --permanent --add-port=9099/tcp",
+                // API which allows full node access
+                "firewall-cmd --permanent --add-port=10250/tcp",
+                "firewall-cmd --permanent --add-port=10251/tcp",
+                "firewall-cmd --permanent --add-port=10252/tcp",
+                // Unauthenticated read-only port, allowing access to node state
+                "firewall-cmd --permanent --add-port=10255/tcp",
+                // Health check server for Kube Proxy
+                "firewall-cmd --permanent --add-port=10256/tcp",
+                // Default port range for external service ports
+                // Typically, these ports would need to be exposed to external load-balancers,
+                //     or other external consumers of the application itself
+                "firewall-cmd --permanent --add-port=30000-32767/tcp",
+                "firewall-cmd --add-masquerade --permanent",
+                "firewall-cmd --reload"
+        ).forEach(super::runSingleCommand);
         super.createTempFileAndUpload(
                 "modules.load.k8s.",
                 ".conf",
@@ -144,7 +175,9 @@ public abstract class K8sBaseInstaller extends Installer implements Configurable
         try (DockerProxy dockerProxy = DockerProxy.Builder.newInstance()
                 .build()) {
             dockerProxy.configure();
-            dockerProxy.pullImage(imageNameWithTag);
+            if (!dockerProxy.existsImage(imageNameWithTag)) {
+                dockerProxy.pullImage(imageNameWithTag);
+            }
             dockerProxy.saveImage(imageNameWithTag, dockerImageFile);
         }
         String targetImageFilePath = String.format("%s/%s.dim", targetPath, targetFileName);
