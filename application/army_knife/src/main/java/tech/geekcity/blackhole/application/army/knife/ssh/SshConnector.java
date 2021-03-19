@@ -186,6 +186,7 @@ public abstract class SshConnector implements Configurable {
                 .errorOutput(stderr)
                 .build()) {
             sshCommander.configure();
+            sshCommander.runAndCheckReturn("mkdir -p $HOME/.ssh && chmod 700 $HOME/.ssh");
             sshCommander.runAndCheckReturn(String.format(
                     "echo '%s' >> $HOME/.ssh/authorized_keys", publicKeyAsStringToWrite));
         }
