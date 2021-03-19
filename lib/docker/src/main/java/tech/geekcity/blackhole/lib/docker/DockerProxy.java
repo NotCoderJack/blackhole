@@ -127,6 +127,15 @@ public abstract class DockerProxy implements Configurable {
                 targetFile);
     }
 
+    public boolean existsImage(String imageName, String tag) {
+        return existsImage(String.format("%s:%s", imageName, tag));
+    }
+
+    public boolean existsImage(String expectedRepoTag) {
+        return null != findImageByRepoTag(expectedRepoTag);
+    }
+
+    @Nullable
     public Image findImageByRepoTag(String expectedRepoTag) {
         ListImagesCmd listImagesCmd = dockerClient.listImagesCmd();
         List<Image> imageList = listImagesCmd.exec();
