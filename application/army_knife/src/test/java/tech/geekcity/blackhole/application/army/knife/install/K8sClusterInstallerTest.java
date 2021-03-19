@@ -32,7 +32,7 @@ public class K8sClusterInstallerTest {
         // ./gradlew --info :application:army_knife:bootJar
         // ./gradlew :application:army_knife:test \
         //     --tests "tech.geekcity.blackhole.application.army.knife.install.K8sClusterInstallerTest" \
-        //     -Pblackhole.test.master_host=master-k8s
+        //     -Pblackhole.test.master_host=master-k8s \
         //     -Pblackhole.test.worker_host.list=worker1-k8s,worker2-k8s
         masterHost = System.getProperty("blackhole.test.master_host", "");
         int masterPort = Integer.parseInt(System.getProperty("blackhole.test.master_port", "22"));

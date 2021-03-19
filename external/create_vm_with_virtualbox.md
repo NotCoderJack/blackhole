@@ -5,26 +5,26 @@
 1. install virtualbox: https://www.virtualbox.org/wiki/Linux_Downloads
 2. download vm ovf
     * ![binary_code_for_vm_ovf.png](images/binary_code_for_vm_ovf.baidu.png)
-    * [centos.7.virtualbox.ovf.tar.gz at pan.baidu.com code(vne2)](https://pan.baidu.com/s/1HpCvnnXlKRJrgF7jbmUvvQ)
+    * [centos.7.virtualbox.ovf.tar.gz at pan.baidu.com code(hanl)](https://pan.baidu.com/s/1ETXjQ2oE30i3sb63oMWMpw)
     * ![binary_code_for_vm_ovf.png](images/binary_code_for_vm_ovf.xunlei.png)
     * [centos.7.virtualbox.ovf.tar.gz at pan.xunlei.com code(7emj)](https://pan.xunlei.com/s/VMW8PHxOeDC90M2JFNSamXceA1)
 3. extract(into ~/packages for example)
-    * ```tar zxvf centos.7.virtualbox.ovf.tar.gz -C ~/packages```
+    * ```tar jxvf centos-base.tar.bz2 -C ~/packages```
 4. import
     * ```shell
-      VBoxManage import ~/packages/centos.7.virtualbox.ovf/centos7.20210219.ovf \
+      VBoxManage import ~/packages/centos-base/centos-base.20210319.ovf \
           --vsys 0 \
           --vmname master-k8s \
           --settingsfile "$HOME/vms/master-k8s/master-k8s.vbox" \
           --cpus 2 \
           --memory 2048
-      VBoxManage import ~/packages/centos.7.virtualbox.ovf/centos7.20210219.ovf \
+      VBoxManage import ~/packages/centos-base/centos-base.20210319.ovf \
           --vsys 0 \
           --vmname worker1-k8s \
           --settingsfile "$HOME/vms/worker1-k8s/worker1-k8s.vbox" \
           --cpus 2 \
           --memory 2048
-      VBoxManage import ~/packages/centos.7.virtualbox.ovf/centos7.20210219.ovf \
+      VBoxManage import ~/packages/centos-base/centos-base.20210319.ovf \
           --vsys 0 \
           --vmname worker2-k8s \
           --settingsfile "$HOME/vms/worker2-k8s/worker2-k8s.vbox" \
