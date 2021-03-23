@@ -1,0 +1,38 @@
+buildscript {
+    repositories {
+        for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+            maven { url(mavenRepositoryUrl) }
+        }
+    }
+}
+plugins {
+    id 'org.inferred.processors' version '3.3.0'
+    id "java"
+}
+
+group = project.rootProject.ext.constructGroupName("lib", project.getName())
+version = project.rootProject.constructVersion()
+sourceCompatibility = project.rootProject.ext.javaVersion
+targetCompatibility = project.rootProject.ext.javaVersion
+
+repositories {
+    for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+        maven { url(mavenRepositoryUrl) }
+    }
+}
+
+dependencies {
+    implementation(project(":lib:core"))
+    processor(project.rootProject.ext.jarDependency("org.inferred", "freebuilder"))
+    implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-databind"))
+    implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-core"))
+    implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-annotations"))
+    implementation(project.rootProject.ext.jarDependency("com.google.guava", "guava"))
+    implementation(project.rootProject.ext.jarDependency("org.freemarker", "freemarker"))
+    testImplementation(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-api"))
+    testRuntimeOnly(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-engine"))
+}
+
+test {
+    useJUnitPlatform()
+}

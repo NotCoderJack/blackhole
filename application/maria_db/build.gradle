@@ -1,0 +1,154 @@
+buildscript {
+    repositories {
+        for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+            maven { url(mavenRepositoryUrl) }
+        }
+    }
+}
+group = project.rootProject.ext.constructGroupName("application", project.getName())
+version = project.rootProject.constructVersion()
+
+def toolJarPath = project.rootProject.ext.toolJarPath
+def buildAbsolutePath = project.buildDir.getAbsolutePath()
+/********************** k8s **********************/
+def configMapName = "maria-db-conf"
+def imageName = "mariadb:10.3.16"
+def k8sYamlTemplateFile = project.file("k8s/maria_db.yaml").getAbsolutePath()
+def k8sYamlPath = "${buildAbsolutePath}/${project.file(k8sYamlTemplateFile).getName()}"
+def secretYamlPath = project.file("k8s/maria.db.secret.yaml")
+def renderPropertyFile = project.file("${buildAbsolutePath}/render.properties")
+def pvcTemplateFile = project.rootProject.ext.pvcTemplateFile
+def nfsStorageClassAndPvcYamlPath = "${buildAbsolutePath}/${project.file(pvcTemplateFile).getName()}"
+def pvcCoreName = "maria-db"
+task generatePropertyFile() {
+    doLast {
+        if (!renderPropertyFile.parentFile.exists()) {
+            renderPropertyFile.parentFile.mkdirs()
+        }
+        renderPropertyFile.text = [
+                "nfs_sotrage_class_name=${pvcCoreName}-nfs-sotrage-class",
+                "nfs_provisioner_name=${nfsProvisionerName}",
+                "nfs_pvc_name=${pvcCoreName}-nfs-pvc",
+                "nfs_pvc_storage_size=1Gi",
+                "maria_db_image_name=${imageName}",
+                "config_map_name=${configMapName}",
+        ].join("\n")
+    }
+}
+// add storage class and pvc
+task renderNfsStorageClassAndPvcPropertyYaml(type: Exec) {
+    commandLine(
+            "java",
+            "-jar", toolJarPath,
+            "tech.geekcity.blackhole.application.tool.RenderText",
+            "--templateFile", pvcTemplateFile,
+            "--propertyFile", renderPropertyFile,
+            "--outputFile", nfsStorageClassAndPvcYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(generatePropertyFile)
+    dependsOn(":application:tool:jar")
+}
+task applyNfsStorageClassAndPvc(type: Exec) {
+    commandLine(
+            "kubectl",
+            "-n", k8sNameSpace,
+            "apply",
+            "-f", nfsStorageClassAndPvcYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(renderNfsStorageClassAndPvcPropertyYaml)
+}
+task deleteNfsStorageClassAndPvc(type: Exec) {
+    commandLine(
+            "kubectl",
+            "-n", k8sNameSpace,
+            "delete",
+            "-f", nfsStorageClassAndPvcYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(renderNfsStorageClassAndPvcPropertyYaml)
+}
+// apply config map
+task applyConfigMap(type: Exec) {
+    commandLine(
+            "kubectl",
+            "-n", k8sNameSpace,
+            "create", "configmap", configMapName,
+            "--from-file=${project.file("config")}",
+    )
+}
+task deleteConfigMap(type: Exec) {
+    commandLine(
+            "kubectl",
+            "-n", k8sNameSpace,
+            "delete", "configmap", configMapName,
+    )
+}
+// apply secret
+task applySecret(type: Exec) {
+    commandLine(
+            "kubectl",
+            "-n", k8sNameSpace,
+            "apply", "-f", secretYamlPath,
+    )
+}
+task deleteSecret(type: Exec) {
+    commandLine(
+            "kubectl",
+            "-n", k8sNameSpace,
+            "delete", "-f", secretYamlPath,
+    )
+}
+// add storage class and pvc
+task renderMariaDbYaml(type: Exec) {
+    commandLine(
+            "java",
+            "-jar", toolJarPath,
+            "tech.geekcity.blackhole.application.tool.RenderText",
+            "--templateFile", k8sYamlTemplateFile,
+            "--propertyFile", renderPropertyFile,
+            "--outputFile", k8sYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(generatePropertyFile)
+    dependsOn(":application:tool:jar")
+}
+// apply maria db
+task applyK8s(type: Exec) {
+    commandLine(
+            "kubectl",
+            "-n", project.rootProject.ext.k8sNameSpace,
+            "apply",
+            "-f", k8sYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(renderMariaDbYaml)
+    dependsOn(applyConfigMap)
+    dependsOn(applySecret)
+}
+task deleteK8s(type: Exec) {
+    commandLine(
+            "kubectl",
+            "-n", project.rootProject.ext.k8sNameSpace,
+            "delete",
+            "-f", k8sYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(renderMariaDbYaml)
+    dependsOn(deleteConfigMap)
+    dependsOn(deleteSecret)
+}
+/********************** k8s ends **********************/

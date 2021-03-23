@@ -1,0 +1,79 @@
+buildscript {
+    repositories {
+        for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+            maven { url(mavenRepositoryUrl) }
+        }
+    }
+}
+plugins {
+    id "org.inferred.processors" version "3.3.0"
+    id "java"
+}
+
+group = project.rootProject.ext.constructGroupName("application", project.getName())
+version = project.rootProject.constructVersion()
+sourceCompatibility = project.rootProject.ext.javaVersion
+targetCompatibility = project.rootProject.ext.javaVersion
+
+repositories {
+    for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+        maven { url(mavenRepositoryUrl) }
+    }
+}
+
+dependencies {
+    implementation(project(":lib:core"))
+    implementation(project(":lib:agent"))
+    implementation(project(":lib:ssh"))
+    implementation(project(":lib:render"))
+    processor(project.rootProject.ext.jarDependency("org.inferred", "freebuilder"))
+    implementation(project.rootProject.ext.jarDependency("com.google.guava", "guava"))
+    implementation(project.rootProject.ext.jarDependency("org.apache.commons", "commons-lang3"))
+    implementation(project.rootProject.ext.jarDependency("org.slf4j", "slf4j-api"))
+    implementation(project.rootProject.ext.jarDependency("org.freemarker", "freemarker"))
+    implementation(project.rootProject.ext.jarDependency("info.picocli", "picocli"))
+    implementation(project.rootProject.ext.jarDependency("commons-io", "commons-io"))
+    // TODO use logback
+    implementation(project.rootProject.ext.jarDependency("org.slf4j", "slf4j-simple"))
+    testImplementation(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-api"))
+    testRuntimeOnly(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-engine"))
+    testImplementation(project.rootProject.ext.jarDependency("org.slf4j", "slf4j-simple"))
+}
+test {
+    useJUnitPlatform()
+}
+def jarBaseName = project.rootProject.ext.toolJarBaseName
+jar {
+    manifest {
+        attributes(
+                'Implementation-Title': 'blackhole.application.tool',
+                'Implementation-Version': project.getVersion(),
+                'Main-Class': 'tech.geekcity.blackhole.application.tool.EntryPoint'
+        )
+    }
+    setArchivesBaseName(jarBaseName)
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+def toolJarPath = project.rootProject.ext.toolJarPath
+def sshdPort = 2222
+task copyToolJarToRemote(type: Exec) {
+    executable("java")
+    args(
+            "-jar", toolJarPath,
+            "tech.geekcity.blackhole.application.tool.RemoteFileTransfer",
+            "--username", "root",
+            "--remoteHost", "localhost",
+            "--remotePort", sshdPort,
+            "--keyPairFile", keyPairFilePath,
+            "--transferType", "upload",
+            "--localFile", toolJarPath,
+            "--remoteFile", "/tmp/${project.file(toolJarPath).getName()}",
+    )
+    doFirst {
+        println(String.format("running command: %s", String.join(" ", getCommandLine())))
+    }
+    dependsOn(jar)
+}

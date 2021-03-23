@@ -1,0 +1,25 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ${nfs_sotrage_class_name}
+parameters:
+  archiveOnDelete: "false"
+provisioner: ${nfs_provisioner_name}
+reclaimPolicy: Retain
+volumeBindingMode: Immediate
+mountOptions:
+  - noresvport
+  - noatime
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ${nfs_pvc_name}
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ${nfs_sotrage_class_name}
+  resources:
+    requests:
+      storage: ${nfs_pvc_storage_size}

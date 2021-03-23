@@ -1,0 +1,25 @@
+buildscript {
+    repositories {
+        for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+            maven { url(mavenRepositoryUrl) }
+        }
+    }
+}
+plugins {
+    id "java"
+}
+
+group = project.rootProject.ext.constructGroupName("lib", project.getName())
+version = project.rootProject.constructVersion()
+sourceCompatibility = project.rootProject.ext.javaVersion
+targetCompatibility = project.rootProject.ext.javaVersion
+
+repositories {
+    for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+        maven { url(mavenRepositoryUrl) }
+    }
+}
+
+dependencies {
+    implementation(project.rootProject.ext.jarDependency("com.google.code.findbugs", "jsr305"))
+}

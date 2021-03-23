@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sshd
+  labels:
+    app: sshd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sshd
+  template:
+    metadata:
+      labels:
+        app: sshd
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: sshd
+          image: ${sshd_image_name}
+          securityContext:
+            privileged: true
+          command: [ "/usr/sbin/init" ]
+          ports:
+            - containerPort: 22
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 100m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sshd-service
+spec:
+  ports:
+    - name: client
+      port: 22
+      protocol: TCP
+      targetPort: 22
+      nodePort: ${nodePort}
+  selector:
+    app: sshd
+  type: NodePort

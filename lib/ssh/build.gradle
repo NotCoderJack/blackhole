@@ -1,0 +1,46 @@
+buildscript {
+    repositories {
+        for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+            maven { url(mavenRepositoryUrl) }
+        }
+    }
+}
+plugins {
+    id "org.inferred.processors" version "3.3.0"
+    id "java"
+}
+
+group = project.rootProject.ext.constructGroupName("lib", project.getName())
+version = project.rootProject.constructVersion()
+sourceCompatibility = project.rootProject.ext.javaVersion
+targetCompatibility = project.rootProject.ext.javaVersion
+
+repositories {
+    for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+        maven { url(mavenRepositoryUrl) }
+    }
+}
+
+dependencies {
+    implementation(project.rootProject.project("lib:core"))
+    implementation(project.rootProject.project("lib:docker"))
+    implementation(project.rootProject.project("lib:render"))
+    processor(project.rootProject.ext.jarDependency("org.inferred", "freebuilder"))
+    implementation(project.rootProject.ext.jarDependency("com.google.guava", "guava"))
+    implementation(project.rootProject.ext.jarDependency("org.apache.commons", "commons-lang3"))
+    testImplementation(project.rootProject.ext.jarDependency("org.slf4j", "slf4j-simple"))
+    implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-core"))
+    implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-databind"))
+    implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-annotations"))
+    implementation(project.rootProject.ext.jarDependency("commons-io", "commons-io"))
+    implementation(project.rootProject.ext.jarDependency("org.apache.sshd", "sshd-core"))
+    implementation(project.rootProject.ext.jarDependency("org.apache.sshd", "sshd-scp"))
+    implementation(project.rootProject.ext.jarDependency("com.github.docker-java", "docker-java-core"))
+
+    testImplementation(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-api"))
+    testRuntimeOnly(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-engine"))
+    testImplementation(project.rootProject.ext.jarDependency("org.slf4j", "slf4j-simple"))
+}
+test {
+    useJUnitPlatform()
+}

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: centos-with-nfs-pvc
+  labels:
+    app: centos-with-nfs-pvc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: centos-with-nfs-pvc
+  template:
+    metadata:
+      labels:
+        app: centos-with-nfs-pvc
+    spec:
+      restartPolicy: Always
+      volumes:
+        - name: data-storage
+          persistentVolumeClaim:
+            claimName: ${nfs_pvc_name}
+      containers:
+        - name: centos-with-nfs-pvc
+          image: centos:centos7.8.2003
+          command: [ "bash", "-c", "sleep 1d" ]
+          volumeMounts:
+            - mountPath: /data-storage
+              name: data-storage
+          resources:
+            limits:
+              cpu: 100m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi

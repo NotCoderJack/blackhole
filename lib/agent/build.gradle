@@ -1,0 +1,77 @@
+buildscript {
+    repositories {
+        for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+            maven { url(mavenRepositoryUrl) }
+        }
+    }
+}
+plugins {
+    id "java"
+    id "org.inferred.processors" version "3.3.0"
+    id "com.google.protobuf" version "0.8.12"
+    id "idea"
+}
+
+group = project.rootProject.ext.constructGroupName("lib", project.getName())
+version = project.rootProject.constructVersion()
+sourceCompatibility = project.rootProject.ext.javaVersion
+targetCompatibility = project.rootProject.ext.javaVersion
+
+repositories {
+    for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+        maven { url(mavenRepositoryUrl) }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs "build/generated/source/proto/main/grpc"
+            srcDirs "build/generated/source/proto/main/java"
+        }
+    }
+}
+
+dependencies {
+    implementation(project(":lib:core"))
+    processor(project.rootProject.ext.jarDependency("org.inferred", "freebuilder"))
+    implementation(project.rootProject.ext.jarDependency("com.google.guava", "guava"))
+    implementation(project.rootProject.ext.jarDependency("org.apache.commons", "commons-lang3"))
+    implementation(project.rootProject.ext.jarDependency("org.slf4j", "slf4j-api"))
+    implementation(project.rootProject.ext.jarDependency("org.freemarker", "freemarker"))
+    implementation(project.rootProject.ext.jarDependency("org.apache.commons", "commons-exec"))
+    implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-databind"))
+    implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-core"))
+    implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-annotations"))
+    // grpc packages: avoid sub-dependencies downloading from repo.maven.apache.org
+    implementation(project.rootProject.ext.jarDependency("io.grpc", "grpc-api"))
+    implementation(project.rootProject.ext.jarDependency("io.grpc", "grpc-core"))
+    implementation(project.rootProject.ext.jarDependency("io.grpc", "grpc-netty-shaded"))
+    implementation(project.rootProject.ext.jarDependency("io.grpc", "grpc-protobuf"))
+    implementation(project.rootProject.ext.jarDependency("io.grpc", "grpc-stub"))
+    implementation(project.rootProject.ext.jarDependency("info.picocli", "picocli"))
+    // necessary for Java 9+
+    implementation(project.rootProject.ext.jarDependency("org.apache.tomcat", "annotations-api"))
+    testImplementation(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-api"))
+    testRuntimeOnly(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-engine"))
+    testImplementation(project.rootProject.ext.jarDependency("org.slf4j", "slf4j-simple"))
+    testImplementation(project.rootProject.ext.jarDependency("io.grpc", "grpc-testing"))
+}
+test {
+    useJUnitPlatform()
+}
+protobuf {
+    protoc {
+        artifact = project.rootProject.ext.jarDependency("com.google.protobuf", "protoc")
+    }
+    plugins {
+        grpc {
+            artifact = project.rootProject.ext.jarDependency("io.grpc", "protoc-gen-grpc-java")
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+}

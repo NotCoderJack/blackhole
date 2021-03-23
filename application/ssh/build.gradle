@@ -1,0 +1,120 @@
+buildscript {
+    repositories {
+        for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+            maven { url(mavenRepositoryUrl) }
+        }
+    }
+}
+group = project.rootProject.ext.constructGroupName("application", project.getName())
+version = project.rootProject.constructVersion()
+
+def toolJarPath = project.rootProject.ext.toolJarPath
+def buildAbsolutePath = project.buildDir.getAbsolutePath()
+/********************** build docker images **********************/
+def buildDockerPath = "${buildAbsolutePath}/docker"
+def httpProxy = java.util.Optional.ofNullable(System.getenv("http_proxy")).orElse("")
+def httpsProxy = java.util.Optional.ofNullable(System.getenv("https_proxy")).orElse("")
+
+def keysDirectory = "${buildDockerPath}/keys"
+task generateRsaKeyFiles(type: Exec) {
+    commandLine(
+            "java",
+            "-jar", toolJarPath,
+            "tech.geekcity.blackhole.application.tool.RsaKeyGenerator",
+            "--idRsaFile", project.rootProject.ext.idRsaFile,
+            "--idRsaPubFile", project.rootProject.ext.idRsaPubFile,
+            "--keyPairFile", project.rootProject.ext.keyPairFilePath,
+            // "--existsDoNothing", "false"
+            // "--overwrite",
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(":application:tool:jar")
+}
+task copyKeys(type: Copy) {
+    from(project.rootProject.ext.idRsaFile)
+    from(project.rootProject.ext.idRsaPubFile)
+    into(keysDirectory)
+    dependsOn(generateRsaKeyFiles)
+}
+def imageName = project.rootProject.ext.constructDockerImageName(project.getName())
+task buildImage(type: Exec) {
+    commandLine(
+            "docker",
+            "build", buildDockerPath,
+            "-f", "${project.file("docker/ssh.dockerfile")}",
+            "--build-arg", "http_proxy=${httpProxy}",
+            "--build-arg", "https_proxy=${httpsProxy}",
+            "-t", imageName,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(copyKeys)
+}
+/********************** build docker images ends **********************/
+/********************** k8s **********************/
+def k8sYamlTemplateFile = project.file("k8s/sshd.yaml").getAbsolutePath()
+def propertyFile = project.file("${buildAbsolutePath}/render.properties")
+def k8sYamlPath = "${buildAbsolutePath}/${project.file(k8sYamlTemplateFile).getName()}"
+def nodePort = "30022"
+task generatePropertyFile() {
+    doLast {
+        if (!propertyFile.parentFile.exists()) {
+            propertyFile.parentFile.mkdirs()
+        }
+        propertyFile.text = [
+                "sshd_image_name=${imageName}",
+                "nodePort=${nodePort}"
+        ].join("\n")
+    }
+}
+task renderSshdYaml(type: Exec) {
+    commandLine(
+            "java",
+            "-jar", toolJarPath,
+            "tech.geekcity.blackhole.application.tool.RenderText",
+            "--templateFile", k8sYamlTemplateFile,
+            "--propertyFile", propertyFile,
+            "--outputFile", k8sYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(generatePropertyFile)
+    dependsOn(":application:tool:jar")
+}
+task applyK8s(type: Exec) {
+    commandLine(
+            "kubectl",
+            "-n", project.rootProject.ext.k8sNameSpace,
+            "apply",
+            "-f", k8sYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+        println("connect with command: " +
+                "ssh " +
+                "-i ${project.rootProject.ext.idRsaFile} " +
+                "-p ${nodePort} " +
+                "-o StrictHostKeyChecking=no " +
+                "-o UserKnownHostsFile=/dev/null " +
+                "root@localhost"
+        )
+    }
+    dependsOn(renderSshdYaml)
+}
+task deleteK8s(type: Exec) {
+    commandLine(
+            "kubectl",
+            "-n", project.rootProject.ext.k8sNameSpace,
+            "delete",
+            "-f", k8sYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(renderSshdYaml)
+}
+/********************** k8s ends **********************/

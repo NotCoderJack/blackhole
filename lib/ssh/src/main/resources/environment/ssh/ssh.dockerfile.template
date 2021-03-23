@@ -1,0 +1,7 @@
+FROM ${CENT_OS_BASE_IMAGE}
+RUN set -x \
+    && yum -y install openssh-server openssh-clients \
+    && systemctl enable sshd \
+    && mkdir -p /root/.ssh \
+    && chmod 700 /root/.ssh
+CMD ["/usr/sbin/init"]

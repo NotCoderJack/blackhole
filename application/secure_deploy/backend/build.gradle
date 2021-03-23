@@ -1,0 +1,48 @@
+buildscript {
+    repositories {
+        for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+            maven { url(mavenRepositoryUrl) }
+        }
+    }
+}
+plugins {
+    id "org.inferred.processors" version "3.3.0"
+    id "org.springframework.boot" version "2.2.2.RELEASE"
+    id "io.spring.dependency-management" version "1.0.8.RELEASE"
+    id "java"
+}
+
+group = project.rootProject.ext.constructGroupName("application.secure_deploy", project.getName())
+version = project.rootProject.constructVersion()
+sourceCompatibility = project.rootProject.ext.javaVersion
+targetCompatibility = project.rootProject.ext.javaVersion
+
+repositories {
+    for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+        maven { url(mavenRepositoryUrl) }
+    }
+}
+
+dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+
+    processor(project.rootProject.ext.jarDependency("org.inferred", "freebuilder"))
+    implementation(project.rootProject.ext.jarDependency("mysql", "mysql-connector-java"))
+    implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-databind"))
+    implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-core"))
+    implementation(project.rootProject.ext.jarDependency("com.fasterxml.jackson.core", "jackson-annotations"))
+    implementation(project.rootProject.ext.jarDependency("com.google.guava", "guava"))
+    implementation(project.rootProject.ext.jarDependency("org.apache.commons", "commons-lang3"))
+
+    testImplementation(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-api"))
+    testRuntimeOnly(project.rootProject.ext.jarDependency("org.junit.jupiter", "junit-jupiter-engine"))
+    testImplementation(project.rootProject.ext.jarDependency("com.h2database", "h2"))
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        exclude group: "org.junit.vintage", module: "junit-vintage-engine"
+    }
+}
+
+test {
+    useJUnitPlatform()
+}

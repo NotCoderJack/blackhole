@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flint
+  labels:
+    app: flint
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flint
+  template:
+    metadata:
+      labels:
+        app: flint
+    spec:
+      restartPolicy: Always
+      volumes:
+        - name: kube-config-volume
+          secret:
+            secretName: kube-config
+      containers:
+        - name: flint
+          image: ${flint_image_name}
+          volumeMounts:
+            - mountPath: /root/.kube/config
+              name: kube-config-volume
+              subPath: config
+              readOnly: true
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 300m
+              memory: 512M
+            requests:
+              cpu: 100m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flint-service
+spec:
+  ports:
+    - name: client
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+      nodePort: 30080
+  selector:
+    app: flint
+  type: NodePort

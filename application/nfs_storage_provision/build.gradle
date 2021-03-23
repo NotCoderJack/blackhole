@@ -1,0 +1,236 @@
+buildscript {
+    repositories {
+        for (mavenRepositoryUrl in project.rootProject.ext.mavenRepositoryUrlList) {
+            maven { url(mavenRepositoryUrl) }
+        }
+    }
+}
+group = project.rootProject.ext.constructGroupName("application", project.getName())
+version = project.rootProject.constructVersion()
+
+def toolJarPath = project.rootProject.ext.toolJarPath
+def buildAbsolutePath = project.buildDir.getAbsolutePath()
+/********************** k8s **********************/
+def k8sCoreName = project.rootProject.ext.coreName
+def k8sNameSpace = project.rootProject.ext.k8sNameSpace
+def propertyFile = project.file("${buildAbsolutePath}/render.properties")
+def k8sRbacTemplateFile = project.file("k8s/rbac.yaml").getAbsolutePath()
+def k8sRbacYamlPath = "${buildAbsolutePath}/${project.file(k8sRbacTemplateFile).getName()}"
+def nfsProvisionerImageName = "quay.io/external_storage/nfs-client-provisioner:v3.1.0-k8s1.11"
+def k8sNfsStorageProvisionerTemplateFile = project.file("k8s/nfs_storage_provisioner.yaml").getAbsolutePath()
+def k8sNfsStorageProvisionerYamlPath = "${buildAbsolutePath}/${project.file(k8sRbacTemplateFile).getName()}"
+def nfsProvisionerName = project.rootProject.ext.nfsProvisionerName
+
+def findNfsServiceIp(namespace, serviceName) {
+    def output = new ByteArrayOutputStream()
+    exec {
+        commandLine("kubectl", "-n", namespace, "describe", "service", serviceName)
+        standardOutput(output)
+    }
+    def map = new HashMap()
+    output.toString().tokenize("\n").each { line ->
+        def keyValue = line.split(":", 2)
+        map.put(keyValue[0], keyValue[1])
+    }
+    return map.get("IP")
+}
+
+task generatePropertyFile() {
+    doLast {
+        if (!propertyFile.parentFile.exists()) {
+            propertyFile.parentFile.mkdirs()
+        }
+        propertyFile.text = [
+                "namespace=${k8sNameSpace}",
+                "nfs_provisioner_service_account_name=${k8sCoreName}-nfs-provisioner-service-account",
+                "nfs_provisioner_cluster_role_name=${k8sCoreName}-nfs-provisioner-cluster-role",
+                "nfs_provisioner_cluster_role_binding_name=${k8sCoreName}-nfs-provisioner-cluster-role-binding",
+                "nfs_provisioner_role_name=${k8sCoreName}-nfs-provisioner-role",
+                "nfs_provisioner_role_binding_name=${k8sCoreName}-nfs-provisioner-role-binding",
+                "nfs_provisioner_name=${nfsProvisionerName}",
+                "nfs_provisioner_image_name=${nfsProvisionerImageName}",
+                "nfs_service_address=${findNfsServiceIp(k8sNameSpace, "nfs-service")}",
+                "nfs_service_path=/",
+        ].join("\n")
+    }
+}
+// rbac
+task renderRbacYaml(type: Exec) {
+    commandLine(
+            "java",
+            "-jar", toolJarPath,
+            "tech.geekcity.blackhole.application.tool.RenderText",
+            "--templateFile", k8sRbacTemplateFile,
+            "--propertyFile", propertyFile,
+            "--outputFile", k8sRbacYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(generatePropertyFile)
+    dependsOn(":application:tool:jar")
+}
+task applyRbac(type: Exec) {
+    commandLine(
+            "kubectl",
+            "-n", k8sNameSpace,
+            "apply",
+            "-f", k8sRbacYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(renderRbacYaml)
+}
+task deleteRbac(type: Exec) {
+    commandLine(
+            "kubectl",
+            "-n", k8sNameSpace,
+            "delete",
+            "-f", k8sRbacYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(renderRbacYaml)
+}
+// nfs storage provisioner
+task renderNfsStorageProvisionerYaml(type: Exec) {
+    commandLine(
+            "java",
+            "-jar", toolJarPath,
+            "tech.geekcity.blackhole.application.tool.RenderText",
+            "--templateFile", k8sNfsStorageProvisionerTemplateFile,
+            "--propertyFile", propertyFile,
+            "--outputFile", k8sNfsStorageProvisionerYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(generatePropertyFile)
+    dependsOn(":application:tool:jar")
+}
+task applyNfsStorageProvisioner(type: Exec) {
+    commandLine(
+            "kubectl",
+            "-n", k8sNameSpace,
+            "apply",
+            "-f", k8sNfsStorageProvisionerYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(renderNfsStorageProvisionerYaml)
+}
+task deleteNfsStorageProvisioner(type: Exec) {
+    commandLine(
+            "kubectl",
+            "-n", k8sNameSpace,
+            "delete",
+            "-f", k8sNfsStorageProvisionerYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(renderNfsStorageProvisionerYaml)
+}
+// add storage class and pvc
+def nfsStorageClassAndPvcPropertyFile = project.file("${buildAbsolutePath}/nfs_storage_class_and_pvc.properties")
+def nfsStorageClassAndPvcTemplateFile = project.file("k8s/nfs_storage_class_and_pvc.yaml").getAbsolutePath()
+def nfsStorageClassAndPvcYamlPath = "${buildAbsolutePath}/${project.file(nfsStorageClassAndPvcTemplateFile).getName()}"
+def pvcCoreName = "centos"
+task generateNfsStorageClassAndPvcPropertyFile() {
+    doLast {
+        if (!nfsStorageClassAndPvcPropertyFile.parentFile.exists()) {
+            nfsStorageClassAndPvcPropertyFile.parentFile.mkdirs()
+        }
+        nfsStorageClassAndPvcPropertyFile.text = [
+                "nfs_sotrage_class_name=${pvcCoreName}-nfs-sotrage-class",
+                "nfs_provisioner_name=${nfsProvisionerName}",
+                "nfs_pvc_name=${pvcCoreName}-nfs-pvc",
+                "nfs_pvc_storage_size=1Gi"
+        ].join("\n")
+    }
+}
+task renderNfsStorageClassAndPvcPropertyYaml(type: Exec) {
+    commandLine(
+            "java",
+            "-jar", toolJarPath,
+            "tech.geekcity.blackhole.application.tool.RenderText",
+            "--templateFile", nfsStorageClassAndPvcTemplateFile,
+            "--propertyFile", nfsStorageClassAndPvcPropertyFile,
+            "--outputFile", nfsStorageClassAndPvcYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(generateNfsStorageClassAndPvcPropertyFile)
+    dependsOn(":application:tool:jar")
+}
+task applyNfsStorageClassAndPvc(type: Exec) {
+    commandLine(
+            "kubectl",
+            "-n", k8sNameSpace,
+            "apply",
+            "-f", nfsStorageClassAndPvcYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(renderNfsStorageClassAndPvcPropertyYaml)
+}
+task deleteNfsStorageClassAndPvc(type: Exec) {
+    commandLine(
+            "kubectl",
+            "-n", k8sNameSpace,
+            "delete",
+            "-f", nfsStorageClassAndPvcYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(renderNfsStorageClassAndPvcPropertyYaml)
+}
+// test with centos-with-nfs-pvc
+def centosTemplateFile = project.file("k8s/centos.yaml").getAbsolutePath()
+def centosYamlPath = "${buildAbsolutePath}/${project.file(nfsStorageClassAndPvcTemplateFile).getName()}"
+task renderCentOsYaml(type: Exec) {
+    commandLine(
+            "java",
+            "-jar", toolJarPath,
+            "tech.geekcity.blackhole.application.tool.RenderText",
+            "--templateFile", centosTemplateFile,
+            "--propertyFile", nfsStorageClassAndPvcPropertyFile,
+            "--outputFile", centosYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(generateNfsStorageClassAndPvcPropertyFile)
+    dependsOn(":application:tool:jar")
+}
+task applyCentos(type: Exec) {
+    commandLine(
+            "kubectl",
+            "-n", k8sNameSpace,
+            "apply",
+            "-f", centosYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(renderCentOsYaml)
+}
+task deleteCentos(type: Exec) {
+    commandLine(
+            "kubectl",
+            "-n", k8sNameSpace,
+            "delete",
+            "-f", centosYamlPath,
+    )
+    doFirst {
+        println("running command: ${String.join(" ", getCommandLine())}")
+    }
+    dependsOn(renderCentOsYaml)
+}
+/********************** k8s ends **********************/
