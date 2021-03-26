@@ -6,3 +6,4 @@ gradle/user
 .gradletasknamecache
 .idea/
 *.iml
+.vscode
