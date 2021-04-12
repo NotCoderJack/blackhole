@@ -3,10 +3,15 @@ import React from 'react'
 export default [
   {
     path: "/cluster/list",
-    component: React.lazy(() => import("./ClusterList"))
+    exact: true,
+    component: React.lazy(() => import("./ClusterList")),
   },
   {
-    path: "/cluster/create",
-    component: React.lazy(() => import("./ClusterCreate"))
-  },
+    path: "/cluster/list/:id",
+    component: React.lazy(() => import("./ClusterDetail"))
+  }
+  // {
+  //   path: "/cluster/create",
+  //   component: React.lazy(() => import("./ClusterCreate"))
+  // },
 ]

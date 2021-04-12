@@ -8,10 +8,10 @@ export const navigations = [
         name: '集群',
         path: "/cluster/list",
       },
-      {
-        name: '创建集群',
-        path: "/cluster/create",
-      },
+      // {
+      //   name: '创建集群',
+      //   path: "/cluster/create",
+      // },
     ]
   },
   {

@@ -23,3 +23,5 @@ export { default as RichTextEditor } from "./components/RichTextEditor";
 export { default as ConfirmationDialog } from "./components/ConfirmationDialog";
 export { default as MatxProgressBar } from "./components/MatxProgressBar";
 export { default as SimpleCard } from "./components/cards/SimpleCard";
+export { default as Terminal } from "./components/Terminal";
+export { default as Upload }  from "./components/Upload"

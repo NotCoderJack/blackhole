@@ -1,8 +1,8 @@
 import React from "react";
-import { Grid, Card, Icon, IconButton, Tooltip, Typography } from "@material-ui/core";
+import { Grid, Card, Icon, IconButton, Tooltip } from "@material-ui/core";
 import { withStyles } from "@material-ui/styles";
-import { ClusterItem } from "app/types/cluster";
-import history from "history.js"
+import { NodeItem } from "app/types"
+import history from "history.js";
 const styles = (theme: any) => ({
   icon: {
     fontSize: "44px",
@@ -11,15 +11,16 @@ const styles = (theme: any) => ({
   }
 });
 
-interface ClusterCardItem extends ClusterItem {}
+interface NodeCardItem extends NodeItem {}
 
-interface  ClusterCardProps {
-  list: ClusterCardItem[]
+interface  NodeCardProps {
+  display?: "card" | "list"
+  list: NodeCardItem[]
 }
 
-const ClusterCard = ({ list }: ClusterCardProps) => {
+const NodeCard = ({ list }: NodeCardProps) => {
   const handleGoToDetail = React.useCallback((id: number) => {
-    history.push(`/cluster/list/${id}`)
+    history.push(`/node/list/${id}`)
   }, [])
   return (
     <Grid container spacing={3} className="mb-3 mt-3">
@@ -27,9 +28,9 @@ const ClusterCard = ({ list }: ClusterCardProps) => {
         return (<Grid item xs={12} md={6} key={item.id}>
           <Card className="play-card p-sm-24 bg-paper" elevation={6}>
             <div className="flex items-center">
-              <Icon>group</Icon>
+              <Icon>cloud_circle</Icon>
               <div className="ml-3">
-                <Typography component="div" className="m-0 mt-1 text-primary font-medium" onClick={() => handleGoToDetail(item.id)}>{item.desc}</Typography>
+                <h6 className="m-0 mt-1 text-primary font-medium">{item.host}</h6>
                 <small className="text-muted">{item.name}</small>
               </div>
             </div>
@@ -45,4 +46,4 @@ const ClusterCard = ({ list }: ClusterCardProps) => {
   );
 };
 
-export default withStyles(styles, { withTheme: true })(ClusterCard);
+export default withStyles(styles, { withTheme: true })(NodeCard);

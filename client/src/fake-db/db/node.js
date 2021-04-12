@@ -1,99 +1,33 @@
 import MockInterceptor from "../interceptor";
+import Mock from "mockjs";
+const Random = Mock.Random;
+const ListDB = Mock.mock({
+  'list|1-10': [{
+    'id|+1': 1,
+    "name": "@ctitle(10)",
+    "desc": "@cword('节点1节点2节点3节点4节点5节点6节点7节点8节点9', 3)",
+    "createTime": "@date",
+    "host": "@ip"
+  }]
+});
+const ItemById = Mock.mock({
+  'id': Random.id(),
+  "name": Random.title(),
+  "createTime": Random.date(),
+  "host": Random.ip()
+});
 
-const ListDB = {
-  list: [
-    {
-      id: 1,
-      email: "uilib@gmail.com",
-      userName: "ui lib",
-      projectName: "Matx development",
-      date: new Date().toLocaleString(),
-      projectImage: "/assets/images/products/headphone-2.jpg",
-      userImage: "/assets/images/face-1.jpg",
-      comment: 0,
-      revision: 5
-    },
-    {
-      id: 2,
-      email: "uilib@gmail.com",
-      userName: "ui lib",
-      projectName: "Matx development",
-      date: new Date().toLocaleString(),
-      projectImage: "/assets/images/products/headphone-2.jpg",
-      userImage: "/assets/images/face-1.jpg",
-      comment: 0,
-      revision: 5
-    },
-    {
-      id: 3,
-      email: "uilib@gmail.com",
-      userName: "ui lib",
-      projectName: "Matx development",
-      date: new Date().toLocaleString(),
-      projectImage: "/assets/images/products/headphone-3.jpg",
-      userImage: "/assets/images/face-1.jpg",
-      comment: 0,
-      revision: 5
-    },
-    {
-      id: 5,
-      email: "uilib@gmail.com",
-      userName: "ui lib",
-      projectName: "Gull development",
-      date: new Date().toLocaleString(),
-      projectImage: "/assets/images/products/headphone-2.jpg",
-      userImage: "/assets/images/face-1.jpg",
-      comment: 0,
-      revision: 5
-    },
-    {
-      id: 6,
-      email: "uilib@gmail.com",
-      userName: "ui lib",
-      projectName: "Evalynn development",
-      date: new Date().toLocaleString(),
-      projectImage: "/assets/images/products/iphone-1.jpg",
-      userImage: "/assets/images/face-1.jpg",
-      comment: 0,
-      revision: 5
-    },
-    {
-      id: 7,
-      email: "uilib@gmail.com",
-      userName: "ui lib",
-      projectName: "Dexum development",
-      date: new Date().toLocaleString(),
-      projectImage: "/assets/images/products/headphone-2.jpg",
-      userImage: "/assets/images/face-1.jpg",
-      comment: 0,
-      revision: 5
-    },
-    {
-      id: 8,
-      email: "uilib@gmail.com",
-      userName: "ui lib",
-      projectName: "Matx development",
-      date: new Date().toLocaleString(),
-      projectImage: "/assets/images/products/headphone-3.jpg",
-      userImage: "/assets/images/face-1.jpg",
-      comment: 0,
-      revision: 5
-    },
-    {
-      id: 9,
-      email: "uilib@gmail.com",
-      userName: "ui lib",
-      projectName: "Matx development",
-      date: new Date().toLocaleString(),
-      projectImage: "/assets/images/products/headphone-3.jpg",
-      userImage: "/assets/images/face-1.jpg",
-      comment: 0,
-      revision: 5
-    }
-  ]
-};
-
-MockInterceptor.onGet("/api/list/all").reply(config => {
+MockInterceptor.onGet("/api/core/nodes").reply(config => {
   const response = ListDB.list;
+  console.log(response)
   return [200, response];
+});
+
+MockInterceptor.onGet(/api\/core\/nodes\/\d+/).reply(config => {
+  console.log(config)
+  return [200, ItemById]
+});
+
+MockInterceptor.onPut("/api/core/nodes").reply(config => {
+  return [200, {message: 'success'}]
 });

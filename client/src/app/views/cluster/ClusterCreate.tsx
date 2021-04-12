@@ -12,6 +12,6 @@ export default function ClusterCreate() {
         ]}
       />
     </div>
-    <Card className="px-6 pt-2 pb-4"><ClusterCreateForm /></Card>
+    <Card className="px-6 py-4"><ClusterCreateForm /></Card>
   </div>
 }

@@ -1,7 +1,15 @@
 import React from 'react'
 import {Breadcrumb } from "designx";
-import ClusterCard from '../cluster/components/ClusterCard'
+import NodeCard from './components/NodeCard'
+import nodeService from 'app/services/nodeService';
+
 export default function NodeList() {
+  const [nodeList, setNodeList] = React.useState([]);
+  React.useEffect(() => {
+    nodeService.getNodeList().then(res => {
+      setNodeList(res)
+    })
+  }, [])
   return <div className="m-sm-30">
     <Breadcrumb
       routeSegments={[
@@ -9,6 +17,6 @@ export default function NodeList() {
         { name: "节点" }
       ]}
     />
-    <ClusterCard list={[]}/>
+    <NodeCard list={nodeList}/>
   </div>
 }

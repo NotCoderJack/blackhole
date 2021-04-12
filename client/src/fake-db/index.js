@@ -11,5 +11,6 @@ import "./db/scrumBoard";
 import "./db/notification";
 import "./db/ecommerce";
 import "./db/cluster";
+import "./db/node";
 
 MockInterceptor.onAny().passThrough();

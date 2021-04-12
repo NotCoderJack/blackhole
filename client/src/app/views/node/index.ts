@@ -2,7 +2,12 @@ import React from 'react'
 export default [
   {
     path: "/node/list",
-    component: React.lazy(() => import("./NodeList"))
+    exact: true,
+    component: React.lazy(() => import("./NodeList")),
+  },
+  {
+    path: "/node/list/:id",
+    component: React.lazy(() => import("./NodeDetail")),
   },
   {
     path: "/node/create",
